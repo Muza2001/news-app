@@ -13,8 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 
 @Component
@@ -63,14 +64,14 @@ public class SampleDataLoader implements CommandLineRunner {
 
         // create 100 rows of news in the database
 
-        List<News> news1 = IntStream.rangeClosed(1, 100)
+        Stream<News> news1 = IntStream.rangeClosed(1, 100)
                 .mapToObj(i -> new News(
                     faker.name().title(),
                     faker.weather().description(),
                         Instant.now(),
                         Instant.now(),
                         faker.internet().url()
-                        )).toList();
-        newsRepository.saveAll(news1);
+                        ));
+        newsRepository.saveAll(news1.collect(Collectors.toList()));
     }
 }
