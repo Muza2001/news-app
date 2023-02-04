@@ -1,18 +1,17 @@
-package digital.one.dto;
+package digital.one.dto.request;
 
-import digital.one.model.News;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.Page;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PagingResponse {
+public class RefreshTokenRequest {
 
-    private Page<News> page;
+    private String token;
 
+    private String username;
 }

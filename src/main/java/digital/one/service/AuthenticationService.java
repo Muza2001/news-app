@@ -1,11 +1,11 @@
 package digital.one.service;
 
-import digital.one.dto.AuthenticationRequestDto;
-import digital.one.dto.UserDto;
+import digital.one.dto.request.AuthenticationRequest;
+import digital.one.dto.request.UserRequest;
 import org.springframework.http.ResponseEntity;
 
 public interface AuthenticationService {
-    ResponseEntity<?> register(UserDto dto);
+    ResponseEntity<?> register(UserRequest dto);
 
-    ResponseEntity<?> login(AuthenticationRequestDto dto);
+    ResponseEntity<?> login(AuthenticationRequest dto);
 }

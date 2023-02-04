@@ -1,18 +1,18 @@
-package digital.one.dto;
+package digital.one.dto.response;
 
+import digital.one.model.News;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Page;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AuthenticationRequestDto {
+public class PagingResponse {
 
-    private String username;
-
-    private String password;
+    private Page<News> page;
 
 }

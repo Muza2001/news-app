@@ -1,4 +1,4 @@
-package digital.one.dto;
+package digital.one.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AuthResponse {
+public class CategoryResponse {
 
-    private String token;
+    private Long id;
+
+    private String name;
+
 }

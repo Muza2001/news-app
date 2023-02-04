@@ -1,7 +1,7 @@
 package digital.one.controller;
 
-import digital.one.dto.AuthenticationRequestDto;
-import digital.one.dto.UserDto;
+import digital.one.dto.request.AuthenticationRequest;
+import digital.one.dto.request.UserRequest;
 import digital.one.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +15,12 @@ public class AuthenticationController {
     private final AuthenticationService service;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserDto dto){
+    public ResponseEntity<?> register(@RequestBody UserRequest dto){
         return ResponseEntity.status(201).body(service.register(dto));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthenticationRequestDto dto){
+    public ResponseEntity<?> login(@RequestBody AuthenticationRequest dto){
         return ResponseEntity.status(200).body(service.login(dto));
     }
 }

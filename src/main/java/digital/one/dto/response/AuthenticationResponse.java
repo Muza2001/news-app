@@ -1,4 +1,4 @@
-package digital.one.dto;
+package digital.one.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

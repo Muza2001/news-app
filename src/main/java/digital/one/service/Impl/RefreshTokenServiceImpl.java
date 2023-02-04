@@ -1,6 +1,6 @@
 package digital.one.service.Impl;
 
-import digital.one.dto.RefreshTokenRequest;
+import digital.one.dto.request.RefreshTokenRequest;
 import digital.one.model.auth.RefreshToken;
 import digital.one.repository.RefreshTokenRepository;
 import digital.one.service.RefreshTokenService;

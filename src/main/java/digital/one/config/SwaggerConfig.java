@@ -48,9 +48,9 @@ public class SwaggerConfig {
     }
 
     private ApiInfo metadata() {
-        return new ApiInfoBuilder().title("API Endpoints for Houzing Web App")
+        return new ApiInfoBuilder().title("API Endpoints for News Web App")
                 .description("This project is a real estate e-commerce website")
-                .license("Apache version 2.0")
+                .license("Apache version 3.8.6")
                 .version("1.1.0")
                 .licenseUrl("https://www.apache.org/licenses/LICENSE-2.0.html")
                 .contact(new Contact("Digital One", "www.digitalone.uz", "gm.khamza@gmail.com"))
