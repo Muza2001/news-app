@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -23,6 +25,6 @@ public class NewsSimpleResponse {
 
     private Instant updated_at;
 
-    private CategoryResponse categoryResponse;
+    private List<CategoryResponse> categoryResponse = new ArrayList<>();
 
 }

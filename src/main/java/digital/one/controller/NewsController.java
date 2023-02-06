@@ -1,6 +1,7 @@
 package digital.one.controller;
 
 import digital.one.dto.request.BasicInfoRequest;
+import digital.one.dto.request.CategoryRequest;
 import digital.one.dto.request.NewsEditRequest;
 import digital.one.dto.request.NewsRequest;
 import digital.one.model.News;
@@ -24,9 +25,8 @@ public class NewsController {
 
 
     @GetMapping("/paging")
-    public Page<News> findAll(@RequestParam int page, @RequestParam int size){
-        PageRequest of = PageRequest.of(page, size);
-        return repository.findAll(of);
+    public ResponseEntity<?> findAll(@RequestParam int page, @RequestParam int size){
+        return ResponseEntity.status(200).body(newsService.findAllPagination(page, size));
     }
 
     @GetMapping("/find_by_id/{id}")
@@ -37,6 +37,11 @@ public class NewsController {
     @PutMapping("/edit_by_id/{id}")
     public ResponseEntity<?> editById(@PathVariable Long id, @RequestBody NewsEditRequest request){
         return ResponseEntity.status(200).body(newsService.edit(request, id));
+    }
+
+    @PostMapping("/add_category/{id}")
+    public ResponseEntity<?> addCategory(@PathVariable Long id, @RequestBody CategoryRequest request){
+        return ResponseEntity.status(200).body(newsService.addCategory(id,request));
     }
 
     @DeleteMapping("/delete_ny_id/{id}")

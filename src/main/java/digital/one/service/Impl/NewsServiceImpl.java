@@ -12,6 +12,9 @@ import digital.one.repository.CategoryRepository;
 import digital.one.repository.NewsRepository;
 import digital.one.service.NewsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -34,48 +37,63 @@ public class NewsServiceImpl implements NewsService {
         News news = new News();
         NewsSimpleResponse newsSimpleResponse;
         Response response;
-        if (request == null){
-            response = Response.builder()
-                    .message("Something wrong")
-                    .status_code(401)
-                    .success(false)
-                    .build();
+        if (request.getCategory_ids() != null){
+            List<Category> categories = new ArrayList<>();
+            for (Long l : request.getCategory_ids()) {
+                if (l != null && l > 0){
+                           categories.add(categoryRepository.findById(l).orElseThrow(()
+                                    -> new IllegalArgumentException("Id not found" + l)));
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Response.builder()
+                            .status_code(401)
+                            .message("Category id not found " + l)
+                            .success(false)
+                            .build());
+                }
+            }
+            news.setCategory(categories);
         }
         else {
-            Optional<Category> optionalCategory = categoryRepository.findById(request.getCategory_id());
-            if (!optionalCategory.isPresent()) {
-                response = Response.builder()
-                        .message("Category id wrong")
-                        .status_code(401)
-                        .success(false)
-                        .build();
-            } else {
-                Category category = optionalCategory.get();
-                news.setCreated_at(Instant.now());
-                news.setUpdated_at(Instant.now());
-                news.setTitle(request.getTitle());
-                news.setCategory(category);
-                news.setDescription(request.getDescription());
-                news.setImageUrl(request.getImageUrl());
-                News save = repository.save(news);
+            news.setCategory(null);
+        }
+            news.setCreated_at(Instant.now());
+            news.setUpdated_at(Instant.now());
+            news.setTitle(request.getTitle());
+            news.setDescription(request.getDescription());
+            news.setImageUrl(request.getImageUrl());
+            News save = repository.save(news);
+            if (news.getCategory() != null) {
+                List<CategoryResponse> categoryResponses = new ArrayList<>();
+                for (Category category : save.getCategory()) {
+                    categoryResponses.add(new CategoryResponse(
+                            category.getId(),
+                            category.getName()));
+                }
+
                 newsSimpleResponse = NewsSimpleResponse.builder()
                         .updated_at(news.getUpdated_at())
                         .created_at(news.getCreated_at())
-                        .categoryResponse(new CategoryResponse(
-                                category.getId(),
-                                category.getName()))
+                        .categoryResponse(categoryResponses)
                         .description(news.getDescription())
                         .title(news.getTitle())
                         .id(save.getId())
                         .build();
-                response = Response.builder()
-                        .success(true)
-                        .message("Successfully created")
-                        .data(newsSimpleResponse)
-                        .status_code(201)
+            }
+            else {
+                newsSimpleResponse = NewsSimpleResponse.builder()
+                        .updated_at(news.getUpdated_at())
+                        .created_at(news.getCreated_at())
+                        .categoryResponse(null)
+                        .description(news.getDescription())
+                        .title(news.getTitle())
+                        .id(save.getId())
                         .build();
             }
-        }
+        response = Response.builder()
+                .success(true)
+                .message("Successfully created")
+                .data(newsSimpleResponse)
+                .status_code(201)
+                .build();
         return ResponseEntity.status(response.getStatus_code()).body(response);
     }
 
@@ -92,16 +110,15 @@ public class NewsServiceImpl implements NewsService {
                     .build();
         } else {
             News news = optionalNews.get();
-            Category category = news.getCategory();
-            CategoryResponse categoryResponse;
-            if (category == null) {
+            List<CategoryResponse> categoryResponse = new ArrayList<>();
+            if (news.getCategory() == null) {
                 categoryResponse = null;
             }
             else {
-                categoryResponse = CategoryResponse.builder()
-                        .name(category.getName())
-                        .id(category.getId())
-                        .build();
+                for (Category category : news.getCategory()) {
+                    categoryResponse.add(new CategoryResponse(category.getId(),category.getName()));
+                }
+
             }
             Optional<List<BasicInformation>> optionalList = basicInformationRepository.findByNewsId(news.getId());
             if (!optionalList.isPresent()){
@@ -175,7 +192,6 @@ public class NewsServiceImpl implements NewsService {
     @Override
     public ResponseEntity<?> edit(NewsEditRequest request, Long id) {
         Optional<News> optionalNews = repository.findById(id);
-        Optional<Category> optionalCategory = categoryRepository.findById(request.getCategory_id());
         Response response;
         NewsResponse newsResponse;
         if (!optionalNews.isPresent()){
@@ -196,7 +212,10 @@ public class NewsServiceImpl implements NewsService {
 
         } else {
             News news = optionalNews.get();
-            Category category = optionalCategory.get();
+            List<Category> categories = new ArrayList<>();
+            for (Long l : request.getCategory_ids()) {
+
+            }
             if (!news.getTitle().equals(request.getTitle()))
                 news.setTitle(request.getTitle());
 
@@ -212,9 +231,10 @@ public class NewsServiceImpl implements NewsService {
             List<BasicInfoResponse> basicInfoResponses = new ArrayList<>();
             if (!optionalList.isPresent()){
                 basicInfoResponses = null;
-            }else {
-            List<BasicInformation> basicInformations = optionalList.get();
-            for (BasicInformation info : basicInformations) {
+            }
+            else {
+            List<BasicInformation> basicInformation = optionalList.get();
+            for (BasicInformation info : basicInformation) {
                 basicInfoResponses.add(new BasicInfoResponse(
                         info.getId(),
                         info.getImageUrl(),
@@ -245,10 +265,23 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
+    public ResponseEntity<?> findAllPagination(int page, int size) {
+        PageRequest of = PageRequest.of(page, size);
+        Page<News> newsPage = repository.findAll(of);
+        Response response = Response.builder()
+                .success(true)
+                .data(newsPage)
+                .message("Paging")
+                .status_code(200)
+                .build();
+        return ResponseEntity.status(200).body(response);
+    }
+
+    @Override
     public ResponseEntity<?> deleteById(Long id) {
         Optional<News> optionalNews = repository.findById(id);
         Response response;
-        if (optionalNews.isPresent()){
+        if (!optionalNews.isPresent()){
             response = Response.builder()
                     .message("News id not found")
                     .success(false)

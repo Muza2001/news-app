@@ -22,7 +22,7 @@ public class NewsResponse {
 
     private String imageUrl;
 
-    private CategoryResponse categoryResponse;
+    private List<CategoryResponse> categoryResponse = new ArrayList<>();
 
     private List<BasicInfoResponse> infoResponses = new ArrayList<>();
 

@@ -5,9 +5,7 @@ import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 
 @Entity
@@ -40,8 +38,9 @@ public class News {
 
     private String imageUrl;
 
-    @ManyToOne
-    private Category category;
+    @ManyToMany
+    @ToString.Exclude
+    private List<Category> category = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {

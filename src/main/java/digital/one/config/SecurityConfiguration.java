@@ -41,7 +41,7 @@ import java.security.interfaces.RSAPublicKey;
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private static final String[] WHITE_LIST = {
-            "/api/v1/auth/**",
+            "/api/v1/auth/login",
             "/api/v1/news/find_by_id/*",
             "/api/v1/news/paging",
             // -- Swagger UI v2
@@ -90,11 +90,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     *                 .cors()
+     *                 .and()
+     * @param http
+     * @throws Exception
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .cors()
-                .and()
                 .csrf()
                 .disable()
                 .authorizeRequests(
