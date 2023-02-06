@@ -11,7 +11,6 @@ import java.util.*;
 @Entity
 @Getter
 @Setter
-@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class News {
@@ -38,8 +37,7 @@ public class News {
 
     private String imageUrl;
 
-    @ManyToMany
-    @ToString.Exclude
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Category> category = new ArrayList<>();
 
     @Override

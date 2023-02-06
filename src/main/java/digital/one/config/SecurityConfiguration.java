@@ -91,7 +91,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     *                 .cors()
+     *                  .cors()
      *                 .and()
      * @param http
      * @throws Exception

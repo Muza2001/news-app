@@ -152,7 +152,7 @@ public class CategoryServiceImpl implements CategoryService {
                     .status_code(200)
                     .message("Category find")
                     .success(true)
-                    .data(category).build();
+                    .data(categoryResponse).build();
         }
         return ResponseEntity.status(response.getStatus_code()).body(response);
     }

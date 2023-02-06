@@ -4,6 +4,7 @@ import digital.one.dto.request.BasicInfoRequest;
 import digital.one.dto.request.CategoryRequest;
 import digital.one.dto.request.NewsEditRequest;
 import digital.one.dto.request.NewsRequest;
+import digital.one.dto.response.Response;
 import digital.one.model.News;
 import digital.one.repository.NewsRepository;
 import digital.one.service.NewsService;
@@ -25,8 +26,8 @@ public class NewsController {
 
 
     @GetMapping("/paging")
-    public ResponseEntity<?> findAll(@RequestParam int page, @RequestParam int size){
-        return ResponseEntity.status(200).body(newsService.findAllPagination(page, size));
+    public ResponseEntity<?> findAll(@RequestParam int page, @RequestParam int size){;
+        return ResponseEntity.status(200).body(newsService.findAllPagination(page,size));
     }
 
     @GetMapping("/find_by_id/{id}")
