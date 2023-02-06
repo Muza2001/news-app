@@ -3,18 +3,16 @@ package digital.one.model;
 import lombok.*;
 import org.hibernate.Hibernate;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.persistence.*;
 import java.time.Instant;
 import java.util.Objects;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@NonNull
-@Builder
 @Table(name = "users")
 public class User {
 
@@ -52,6 +50,7 @@ public class User {
         User user = (User) o;
         return id != null && Objects.equals(id, user.id);
     }
+
     @Override
     public int hashCode() {
         return getClass().hashCode();

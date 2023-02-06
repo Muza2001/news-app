@@ -1,11 +1,12 @@
 package digital.one.config;
 
 import com.github.javafaker.Faker;
+import digital.one.model.Category;
 import digital.one.model.News;
 import digital.one.model.User;
+import digital.one.repository.CategoryRepository;
 import digital.one.repository.NewsRepository;
 import digital.one.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -19,7 +20,6 @@ import java.util.stream.Stream;
 
 
 @Component
-@RequiredArgsConstructor
 public class SampleDataLoader implements CommandLineRunner {
 
     private Logger logger = LoggerFactory.getLogger(SampleDataLoader.class);
@@ -29,29 +29,26 @@ public class SampleDataLoader implements CommandLineRunner {
 
     private final UserRepository userRepository;
 
+    private final CategoryRepository categoryRepository;
+
     private final Faker faker;
+
+    public SampleDataLoader(NewsRepository newsRepository,
+                            PasswordEncoder passwordEncoder,
+                            UserRepository userRepository,
+                            CategoryRepository categoryRepository, Faker faker) {
+        this.newsRepository = newsRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.userRepository = userRepository;
+        this.categoryRepository = categoryRepository;
+        this.faker = faker;
+    }
 
     @Override
     public void run(String... args) throws Exception {
         logger.info("Loading faker data");
 
         // create 1 account
-
-        /**
-         * private String full_name;
-         *
-         *     private String password;
-         *
-         *     @Column(unique = true, name = "username")
-         *     private String username;
-         *
-         *     @Column(unique = true, name = "email")
-         *     private String email;
-         *
-         *     private Instant expiration;
-         *
-         *     private Boolean isEnabled;
-         */
 
         userRepository.save(new User(
                 "Muzaffar Mahmudov",
@@ -61,6 +58,8 @@ public class SampleDataLoader implements CommandLineRunner {
                 Instant.now(),
                 true
         ));
+
+        categoryRepository.save(new Category("Category"));
 
         // create 100 rows of news in the database
 

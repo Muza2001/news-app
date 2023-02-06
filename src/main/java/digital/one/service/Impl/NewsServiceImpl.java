@@ -1,6 +1,7 @@
 package digital.one.service.Impl;
 
 import digital.one.dto.request.BasicInfoRequest;
+import digital.one.dto.request.CategoryRequest;
 import digital.one.dto.request.NewsEditRequest;
 import digital.one.dto.request.NewsRequest;
 import digital.one.dto.response.*;
@@ -202,19 +203,12 @@ public class NewsServiceImpl implements NewsService {
                     .data(null)
                     .build();
         }
-        else if (!optionalCategory.isPresent()) {
-            response = Response.builder()
-                    .message("Category id not found")
-                    .status_code(401)
-                    .success(false)
-                    .data(null)
-                    .build();
-
-        } else {
+        else {
             News news = optionalNews.get();
             List<Category> categories = new ArrayList<>();
             for (Long l : request.getCategory_ids()) {
-
+                    categories.add(categoryRepository.findById(l)
+                            .orElseThrow(() -> new IllegalArgumentException("Id not found")));
             }
             if (!news.getTitle().equals(request.getTitle()))
                 news.setTitle(request.getTitle());
@@ -225,8 +219,7 @@ public class NewsServiceImpl implements NewsService {
             if (!news.getImageUrl().equals(request.getImageUrl()))
                 news.setImageUrl(request.getImageUrl());
 
-            if (!news.getCategory().equals(category))
-                news.setCategory(category);
+            news.setCategory(categories);
             Optional<List<BasicInformation>> optionalList = basicInformationRepository.findByNewsId(news.getId());
             List<BasicInfoResponse> basicInfoResponses = new ArrayList<>();
             if (!optionalList.isPresent()){
@@ -243,15 +236,19 @@ public class NewsServiceImpl implements NewsService {
                 ));
             }
         }
+
+            List<CategoryResponse> categoryResponses = new ArrayList<>();
+            for (Category c : categories) {
+                categoryResponses.add(new CategoryResponse(c.getId(), c.getName()));
+            }
+
             news.setUpdated_at(Instant.now());
             repository.save(news);
             newsResponse = NewsResponse.builder()
                     .title(news.getTitle())
                     .imageUrl(news.getImageUrl())
                     .infoResponses(basicInfoResponses)
-                    .categoryResponse(new CategoryResponse(
-                            category.getId(),
-                            category.getName()))
+                    .categoryResponse(categoryResponses)
                     .id(news.getId())
                     .build();
             response = Response.builder()
@@ -275,6 +272,11 @@ public class NewsServiceImpl implements NewsService {
                 .status_code(200)
                 .build();
         return ResponseEntity.status(200).body(response);
+    }
+
+    @Override
+    public ResponseEntity<?> addCategory(Long id, CategoryRequest request) {
+        return null;
     }
 
     @Override
