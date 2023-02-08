@@ -1,16 +1,12 @@
 package digital.one.service;
 
-import digital.one.dto.request.BasicInfoRequest;
-import digital.one.dto.request.CategoryRequest;
-import digital.one.dto.request.NewsEditRequest;
-import digital.one.dto.request.NewsRequest;
+import digital.one.dto.request.*;
 import org.springframework.http.ResponseEntity;
 
 public interface NewsService {
 
     ResponseEntity<?> create(NewsRequest request);
 
-    ResponseEntity<?> addInfoById(BasicInfoRequest requests, Long id);
 
     ResponseEntity<?> findById(Long id);
 
@@ -20,5 +16,6 @@ public interface NewsService {
 
     ResponseEntity<?> findAllPagination(int page, int size);
 
-    ResponseEntity<?> addCategory(Long id, CategoryRequest request);
+
+    ResponseEntity<?> searching(String title);
 }

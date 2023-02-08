@@ -15,7 +15,6 @@ import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2Res
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.repository.cdi.Eager;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -32,9 +31,11 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
+import org.springframework.web.cors.CorsConfiguration;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Collections;
 
 @EnableWebSecurity
 @Configuration
@@ -44,6 +45,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             "/api/v1/auth/login",
             "/api/v1/news/find_by_id/*",
             "/api/v1/news/paging",
+            "/api/v1/news/searching/*",
             // -- Swagger UI v2
             "/v2/api-docs",
             "/swagger-resources",
@@ -90,15 +92,20 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     *                  .cors()
-     *                 .and()
-     * @param http
-     * @throws Exception
-     */
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .cors()
+                .configurationSource(request -> {
+                    CorsConfiguration configuration = new CorsConfiguration();
+                    configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
+                    configuration.setAllowedMethods(Collections.singletonList("GET"));
+                    configuration.setAllowedHeaders(Collections.singletonList("*"));
+                    configuration.setAllowCredentials(true);
+                    return configuration;
+                })
+                .and()
                 .csrf()
                 .disable()
                 .authorizeRequests(

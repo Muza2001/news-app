@@ -24,6 +24,6 @@ public class NewsResponse {
 
     private List<CategoryResponse> categoryResponse = new ArrayList<>();
 
-    private List<BasicInfoResponse> infoResponses = new ArrayList<>();
+    private List<BasicInfoResponseWithoutNews> infoResponses = new ArrayList<>();
 
 }

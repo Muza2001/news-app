@@ -100,6 +100,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public ResponseEntity<?> addCategory(Long id, CategoryRequest request) {
+        return null;
+    }
+
+    @Override
     public ResponseEntity<?> create(CategoryRequest request) {
         Category category = new Category();
         Response response;

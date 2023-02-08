@@ -1,9 +1,6 @@
 package digital.one.controller;
 
-import digital.one.dto.request.BasicInfoRequest;
-import digital.one.dto.request.CategoryRequest;
-import digital.one.dto.request.NewsEditRequest;
-import digital.one.dto.request.NewsRequest;
+import digital.one.dto.request.*;
 import digital.one.dto.response.Response;
 import digital.one.model.News;
 import digital.one.repository.NewsRepository;
@@ -22,12 +19,15 @@ import java.util.List;
 public class NewsController {
 
     private final NewsService newsService;
-    private final NewsRepository repository;
-
 
     @GetMapping("/paging")
     public ResponseEntity<?> findAll(@RequestParam int page, @RequestParam int size){;
         return ResponseEntity.status(200).body(newsService.findAllPagination(page,size));
+    }
+
+    @GetMapping("/searching/{title}")
+    public ResponseEntity<?> searching(@PathVariable String title){;
+        return ResponseEntity.status(200).body(newsService.searching(title));
     }
 
     @GetMapping("/find_by_id/{id}")
@@ -40,11 +40,6 @@ public class NewsController {
         return ResponseEntity.status(200).body(newsService.edit(request, id));
     }
 
-    @PostMapping("/add_category/{id}")
-    public ResponseEntity<?> addCategory(@PathVariable Long id, @RequestBody CategoryRequest request){
-        return ResponseEntity.status(200).body(newsService.addCategory(id,request));
-    }
-
     @DeleteMapping("/delete_ny_id/{id}")
     public ResponseEntity<?> deleteById(@PathVariable Long id){
         return ResponseEntity.status(200).body(newsService.deleteById(id));
@@ -55,8 +50,5 @@ public class NewsController {
         return ResponseEntity.status(201).body(newsService.create(request));
     }
 
-    @PostMapping("/add_information_by_id/{id}")
-    public ResponseEntity<?> add_info(@RequestBody BasicInfoRequest requests, @PathVariable Long id){
-            return ResponseEntity.status(200).body(newsService.addInfoById(requests, id));
-    }
+
 }

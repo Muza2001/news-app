@@ -5,19 +5,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BasicInfoResponse {
+public class BasicInfoResponseWithoutNews {
 
     private Long id;
 
     private String imageUrl;
 
     private String message;
-
-    private NewsSimpleResponse newsResponse;
 
 }
