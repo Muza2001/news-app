@@ -19,7 +19,8 @@ public class BasicInformation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String imageUrl;
+    @ManyToOne
+    private ImageData imageData;
 
     @Column(length = 1000)
     private String message;

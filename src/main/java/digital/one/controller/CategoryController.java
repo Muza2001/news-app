@@ -4,6 +4,7 @@ import digital.one.dto.request.CategoryRequest;
 import digital.one.service.CategoryService;
 import digital.one.service.NewsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,19 +20,19 @@ public class CategoryController {
         return ResponseEntity.status(201).body(service.create(request));
     }
 
-    @PostMapping("/add_category/{id}")
-    public ResponseEntity<?> addCategory(@PathVariable Long id, @RequestBody CategoryRequest request){
-        return ResponseEntity.status(200).body(service.addCategory(id,request));
-    }
-
     @PutMapping("/edit_by_id/{id}")
-    public ResponseEntity<?> editById(@PathVariable Long id, CategoryRequest request){
+    public ResponseEntity<?> editById(@PathVariable Long id, @RequestBody CategoryRequest request){
         return ResponseEntity.status(200).body(service.editById(id,request));
     }
 
     @GetMapping("/get_by_id/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id){
         return ResponseEntity.status(200).body(service.getById(id));
+    }
+
+    @GetMapping("/find_all")
+    public ResponseEntity<?> findAll(){
+        return ResponseEntity.status(HttpStatus.OK).body(service.findAll());
     }
 
     @DeleteMapping("/delete_by_id/{id}")

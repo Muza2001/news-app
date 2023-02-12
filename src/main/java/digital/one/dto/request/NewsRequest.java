@@ -1,6 +1,5 @@
 package digital.one.dto.request;
 
-import digital.one.model.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +19,7 @@ public class NewsRequest {
 
     private String description;
 
-    private String imageUrl;
+    private Long image_id;
 
     private List<Long> category_ids = new ArrayList<>();
 }

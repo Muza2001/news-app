@@ -15,12 +15,23 @@ import java.util.*;
 @NoArgsConstructor
 public class News {
 
-    public News(String title, String description, Instant created_at, Instant updated_at, String imageUrl) {
+    public News(String title,
+                String description,
+                Instant created_at,
+                Instant updated_at,
+                ImageData imageData) {
         this.title = title;
         this.description = description;
         this.created_at = created_at;
         this.updated_at = updated_at;
-        this.imageUrl = imageUrl;
+        this.imageData = imageData;
+    }
+
+    public News(String title, String description, Instant created_at, Instant updated_at) {
+        this.title = title;
+        this.description = description;
+        this.created_at = created_at;
+        this.updated_at = updated_at;
     }
 
     @Id
@@ -35,7 +46,8 @@ public class News {
 
     private Instant updated_at;
 
-    private String imageUrl;
+    @ManyToOne
+    private ImageData imageData;
 
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Category> category = new ArrayList<>();

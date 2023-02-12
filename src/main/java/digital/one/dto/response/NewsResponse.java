@@ -20,7 +20,7 @@ public class NewsResponse {
 
     private String description;
 
-    private String imageUrl;
+    private ImageDataResponse imageDataResponse;
 
     private List<CategoryResponse> categoryResponse = new ArrayList<>();
 

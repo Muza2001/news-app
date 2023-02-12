@@ -5,9 +5,11 @@ import org.springframework.http.ResponseEntity;
 
 public interface BasicInfoService {
 
-    ResponseEntity<?> addInfoById(BasicInfoRequest requests, Long id);
+    ResponseEntity<?> create(BasicInfoRequest requests);
 
     ResponseEntity<?> findById(Long id);
 
-    ResponseEntity<?> findByNewsId(Long id);
+    ResponseEntity<?> editById(Long id, BasicInfoRequest basicInfoRequest);
+
+    ResponseEntity<?> delete(Long id);
 }

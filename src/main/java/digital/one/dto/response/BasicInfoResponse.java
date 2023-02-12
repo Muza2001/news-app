@@ -14,7 +14,7 @@ public class BasicInfoResponse {
 
     private Long id;
 
-    private String imageUrl;
+    private ImageDataResponse imageDataResponse;
 
     private String message;
 

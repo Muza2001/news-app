@@ -18,7 +18,7 @@ public class NewsEditRequest {
 
     private String description;
 
-    private String imageUrl;
+    private Long image_id;
 
     private List<Long> category_ids = new ArrayList<>();
 

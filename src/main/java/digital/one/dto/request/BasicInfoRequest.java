@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BasicInfoRequest {
 
-    private String imagerUrl;
+    private Long image_id;
+
+    private Long news_id;
 
     private String message;
 

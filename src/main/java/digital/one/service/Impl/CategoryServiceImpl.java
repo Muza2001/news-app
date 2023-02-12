@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Transactional
@@ -30,31 +32,35 @@ public class CategoryServiceImpl implements CategoryService {
     public ResponseEntity<?> deleteById(Long id) {
         Optional<Category> optionalCategory = repository.findById(id);
         Response response = null;
+        boolean b = false;
         if (!optionalCategory.isPresent()){
             response = Response.builder()
                     .success(false)
                     .data(null)
                     .message("Category id not found")
-                    .status_code(401)
+                    .status_code(404)
                     .build();
         }
         else {
             Category category = optionalCategory.get();
             for (News news : newsRepository.findAll()) {
                 if (news != null) {
-                    if (category.equals(news.getCategory())){
-                        response = Response.builder()
-                                .status_code(401)
-                                .message("This category already used please first delete news related to this category")
-                                .data(null)
-                                .success(false)
-                                .build();
-                        break;
+                    for (Category category1 : news.getCategory()) {
+                        if (category1.equals(category)){
+                            response = Response.builder()
+                                    .status_code(401)
+                                    .message("This category already used please first delete news related to this category")
+                                    .data(null)
+                                    .success(false)
+                                    .build();
+                            b = true;
+                            break;
                     }
                 }
             }
-            assert response != null;
-            if (!response.getStatus_code().equals(401)) {
+        }
+            if (!b) {
+                repository.delete(category);
                 response = Response.builder()
                         .success(true)
                         .message("Successfully deleted")
@@ -75,14 +81,14 @@ public class CategoryServiceImpl implements CategoryService {
                     .success(false)
                     .data(null)
                     .message("Category id not found")
-                    .status_code(401)
+                    .status_code(404)
                     .build();
         }
         else {
             Category category = optionalCategory.get();
 
             if (!category.getName().equals(request.getName()))
-                category.setName(request.getName());
+                category.setName(request.getName().toUpperCase());
 
             Category save = repository.save(category);
             categoryResponse = CategoryResponse.builder()
@@ -99,10 +105,7 @@ public class CategoryServiceImpl implements CategoryService {
         return ResponseEntity.status(response.getStatus_code()).body(response);
     }
 
-    @Override
-    public ResponseEntity<?> addCategory(Long id, CategoryRequest request) {
-        return null;
-    }
+
 
     @Override
     public ResponseEntity<?> create(CategoryRequest request) {
@@ -114,7 +117,7 @@ public class CategoryServiceImpl implements CategoryService {
             response = Response.builder()
                     .message("Category name already exists")
                     .success(false)
-                    .status_code(401)
+                    .status_code(404)
                     .build();
         }
         else {
@@ -137,14 +140,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public ResponseEntity<?> getById(Long id) {
         Optional<Category> optionalCategory = repository.findById(id);
-        Response response = null;
+        Response response;
         CategoryResponse categoryResponse;
         if (!optionalCategory.isPresent()){
             response = Response.builder()
                     .success(false)
                     .data(null)
                     .message("Category id not found")
-                    .status_code(401)
+                    .status_code(404)
                     .build();
         }
         else {
@@ -160,5 +163,20 @@ public class CategoryServiceImpl implements CategoryService {
                     .data(categoryResponse).build();
         }
         return ResponseEntity.status(response.getStatus_code()).body(response);
+    }
+
+    @Override
+    public ResponseEntity<?> findAll() {
+        List<CategoryResponse> categoryResponses = new ArrayList<>();
+        for (Category category : repository.findAll()) {
+            categoryResponses.add(new CategoryResponse(category.getId(),category.getName()));
+        }
+        Response response = Response.builder()
+                .data(categoryResponses)
+                .status_code(200)
+                .success(true)
+                .message("Categories")
+                .build();
+        return ResponseEntity.status(200).body(response);
     }
 }

@@ -10,7 +10,8 @@ public interface CategoryService {
 
     ResponseEntity<?> create(CategoryRequest request);
 
-    ResponseEntity<?> addCategory(Long id, CategoryRequest request);
-
     ResponseEntity<?> editById(Long id, CategoryRequest request);
+
+    ResponseEntity<?> findAll();
+
 }

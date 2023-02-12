@@ -2,9 +2,11 @@ package digital.one.config;
 
 import com.github.javafaker.Faker;
 import digital.one.model.Category;
+import digital.one.model.ImageData;
 import digital.one.model.News;
 import digital.one.model.User;
 import digital.one.repository.CategoryRepository;
+import digital.one.repository.ImageDataRepository;
 import digital.one.repository.NewsRepository;
 import digital.one.repository.UserRepository;
 import org.slf4j.Logger;
@@ -30,6 +32,7 @@ public class SampleDataLoader implements CommandLineRunner {
     private final UserRepository userRepository;
 
     private final CategoryRepository categoryRepository;
+
 
     private final Faker faker;
 
@@ -58,8 +61,12 @@ public class SampleDataLoader implements CommandLineRunner {
                 Instant.now(),
                 true
         ));
+        Stream<Category> categoryStream = IntStream.rangeClosed(1,10)
+                        .mapToObj(category -> new Category(
+                                faker.name().name().toUpperCase()
+                        ));
 
-        categoryRepository.save(new Category("Category"));
+        categoryRepository.saveAll(categoryStream.collect(Collectors.toList()));
 
         // create 100 rows of news in the database
 
@@ -68,8 +75,7 @@ public class SampleDataLoader implements CommandLineRunner {
                     faker.name().title(),
                     faker.weather().description(),
                         Instant.now(),
-                        Instant.now(),
-                        faker.internet().url()
+                        Instant.now()
                         ));
         newsRepository.saveAll(news1.collect(Collectors.toList()));
     }

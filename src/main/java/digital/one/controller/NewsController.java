@@ -1,17 +1,12 @@
 package digital.one.controller;
 
 import digital.one.dto.request.*;
-import digital.one.dto.response.Response;
-import digital.one.model.News;
-import digital.one.repository.NewsRepository;
 import digital.one.service.NewsService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 
 @RestController()
 @RequestMapping("/api/v1/news")
@@ -49,6 +44,5 @@ public class NewsController {
     public ResponseEntity<?> create(@RequestBody NewsRequest request){
         return ResponseEntity.status(201).body(newsService.create(request));
     }
-
 
 }

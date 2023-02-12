@@ -13,7 +13,7 @@ public class BasicInfoResponseWithoutNews {
 
     private Long id;
 
-    private String imageUrl;
+    private ImageDataResponse imageDataResponse;
 
     private String message;
 

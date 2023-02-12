@@ -14,9 +14,9 @@ public class BasicInfoController {
     private final BasicInfoService service;
 
 
-    @PostMapping("/add_information_by_id/{id}")
-    public ResponseEntity<?> add_info(@RequestBody BasicInfoRequest requests, @PathVariable Long id){
-        return ResponseEntity.status(200).body(service.addInfoById(requests, id));
+    @PostMapping("/create")
+    public ResponseEntity<?> create(@RequestBody BasicInfoRequest requests){
+        return ResponseEntity.status(200).body(service.create(requests));
     }
 
     @GetMapping("/find_by_id/{id}")
@@ -24,9 +24,15 @@ public class BasicInfoController {
         return ResponseEntity.status(200).body(service.findById(id));
     }
 
-    @GetMapping("/find_by_news_id/{id}")
-    public ResponseEntity<?> findByNewsId(@PathVariable Long id){
-        return ResponseEntity.ok().body(service.findByNewsId(id));
+    @PutMapping("/edit/{basic_info_id}")
+    public ResponseEntity<?> edit(@PathVariable(name = "basic_info_id") Long id,
+                                  @RequestBody BasicInfoRequest basicInfoRequest){
+        return ResponseEntity.status(200).body(service.editById(id, basicInfoRequest));
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id){
+        return ResponseEntity.status(200).body(service.delete(id));
     }
 
 }

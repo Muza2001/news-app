@@ -12,4 +12,5 @@ public interface BasicInformationRepository extends JpaRepository<BasicInformati
 
     Optional<List<BasicInformation>> findByNewsId(Long news_id);
 
+    void deleteByNewsId(Long news_id);
 }
