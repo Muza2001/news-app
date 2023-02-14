@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2Res
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -64,8 +65,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
             "/swagger-ui/**"
     };
 
-    public static Set<String> methods = new HashSet<>();
-
 
     private final AuthenticationServiceImpl myUserService;
 
@@ -107,7 +106,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
                 .configurationSource(request -> {
                     CorsConfiguration configuration = new CorsConfiguration();
                          configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
-                         configuration.setAllowedMethods((List<String>) methods);
+                         configuration.addAllowedMethod(HttpMethod.GET);
+                         configuration.addAllowedMethod(HttpMethod.PUT);
+                         configuration.addAllowedMethod(HttpMethod.POST);
+                         configuration.addAllowedMethod(HttpMethod.DELETE);
                          configuration.setAllowedHeaders(Collections.singletonList("*"));
                          configuration.setAllowCredentials(true);
                     return configuration;
