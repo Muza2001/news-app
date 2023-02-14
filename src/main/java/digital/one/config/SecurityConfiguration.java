@@ -32,14 +32,17 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Collections;
+import java.util.List;
 
 @EnableWebSecurity
 @Configuration
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
 
     private static final String[] WHITE_LIST = {
             "/api/v1/auth/login",
@@ -103,10 +106,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .configurationSource(request -> {
                     CorsConfiguration configuration = new CorsConfiguration();
                     configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
-                    configuration.setAllowedMethods(Collections.singletonList("GET"));
-                    configuration.setAllowedMethods(Collections.singletonList("PUT"));
-                    configuration.setAllowedMethods(Collections.singletonList("POST"));
-                    configuration.setAllowedMethods(Collections.singletonList("DELETE"));
+                    configuration.setAllowedMethods(List.of("GET","POST", "PUT", "DELETE"));
                     configuration.setAllowedHeaders(Collections.singletonList("*"));
                     configuration.setAllowCredentials(true);
                     return configuration;
