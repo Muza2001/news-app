@@ -9,14 +9,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @EnableScheduling
 @SpringBootApplication
-public class NewsAppApplication /*implements WebMvcConfigurer*/{
+public class NewsAppApplication implements WebMvcConfigurer{
 
     public static void main(String[] args) {
         SpringApplication.run(NewsAppApplication.class, args);
     }
 
 
-   /* @Bean
+    @Bean
     public WebMvcConfigurer configurer(){
         return new WebMvcConfigurer() {
             @Override
@@ -27,6 +27,6 @@ public class NewsAppApplication /*implements WebMvcConfigurer*/{
                         .allowedMethods("GET", "POST", "PUT", "DELETE");
             }
         };
-    }*/
+    }
 
 }
