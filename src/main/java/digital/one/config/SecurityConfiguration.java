@@ -45,7 +45,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             "/api/v1/auth/login",
             "/api/v1/news/find_by_id/*",
             "/api/v1/news/paging",
-            "/api/v1/news/searching/*",
+            "/api/v1/image/find_by_id/*",
+            "/api/v1/category/find_all",
+            "/api/v1/category/find_by_id/*",
+            "/api/v1/basic_info/find_by_id/*",
             // -- Swagger UI v2
             "/v2/api-docs",
             "/swagger-resources",
@@ -101,6 +104,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                     CorsConfiguration configuration = new CorsConfiguration();
                     configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
                     configuration.setAllowedMethods(Collections.singletonList("GET"));
+                    configuration.setAllowedMethods(Collections.singletonList("PUT"));
+                    configuration.setAllowedMethods(Collections.singletonList("POST"));
+                    configuration.setAllowedMethods(Collections.singletonList("DELETE"));
                     configuration.setAllowedHeaders(Collections.singletonList("*"));
                     configuration.setAllowCredentials(true);
                     return configuration;

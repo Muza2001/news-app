@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 public interface CategoryService {
     ResponseEntity<?> deleteById(Long id);
 
-    ResponseEntity<?> getById(Long id);
+    ResponseEntity<?> findById(Long id);
 
     ResponseEntity<?> create(CategoryRequest request);
 

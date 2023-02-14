@@ -2,8 +2,12 @@ package digital.one.service.Impl;
 
 import digital.one.dto.response.ImageDataResponse;
 import digital.one.dto.response.Response;
+import digital.one.model.BasicInformation;
 import digital.one.model.ImageData;
+import digital.one.model.News;
+import digital.one.repository.BasicInformationRepository;
 import digital.one.repository.ImageDataRepository;
+import digital.one.repository.NewsRepository;
 import digital.one.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +23,9 @@ import java.util.Optional;
 public class ImageServiceImpl implements ImageService {
 
     private final ImageDataRepository repository;
+    private final BasicInformationRepository basicInformationRepository;
+
+    private final NewsRepository newsRepository;
 
     @Override
     public ResponseEntity<?> uploadImage(MultipartFile multipartFile) throws IOException {
@@ -61,7 +68,7 @@ public class ImageServiceImpl implements ImageService {
                     .size(save.getSize())
                     .name(save.getName())
                     .created_at(save.getCreated_at())
-                    .updated_at(save.getUpdated_at()).build();
+                    .build();
             response = Response.builder()
                     .data(imageDataResponse)
                     .status_code(201)
@@ -95,7 +102,6 @@ public class ImageServiceImpl implements ImageService {
                     .originalName(save.getOriginalName())
                     .size(save.getSize())
                     .created_at(save.getCreated_at())
-                    .updated_at(save.getUpdated_at())
                     .contentType(save.getContentType())
                     .build();
             response = Response.builder()
@@ -116,7 +122,7 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public ResponseEntity<?> downloadById(Long id) {
+    public ResponseEntity<?> findById(Long id) {
         Optional<ImageData> byId = repository.findById(id);
         Response response;
         ImageDataResponse imageDataResponse;
@@ -128,7 +134,6 @@ public class ImageServiceImpl implements ImageService {
                     .originalName(save.getOriginalName())
                     .size(save.getSize())
                     .contentType(save.getContentType())
-                    .updated_at(save.getUpdated_at())
                     .created_at(save.getCreated_at())
                     .name(save.getName())
                     .build();
@@ -154,15 +159,32 @@ public class ImageServiceImpl implements ImageService {
     public ResponseEntity<?> delete(Long id) {
         Optional<ImageData> byId = repository.findById(id);
         Response response;
-        if (byId.isPresent()){
+        if (byId.isPresent()) {
             ImageData imageData = byId.get();
-            repository.delete(imageData);
-            response = Response.builder()
-                    .success(true)
-                    .message("Image data successfully deleted")
-                    .status_code(200)
-                    .build();
-        }
+                if (basicInformationRepository.existsByImageData(imageData)) {
+                    return ResponseEntity.status(400).body(Response.builder()
+                            .status_code(400)
+                            .message("This image already used please first delete basic info related to this image")
+                            .success(false)
+                            .build());
+                }
+
+                if (newsRepository.existsByImageData(imageData)) {
+                    return ResponseEntity.status(400).body(Response.builder()
+                            .status_code(400)
+                            .message("This image already used please first delete news related to this image")
+                            .success(false)
+                            .build());
+                    }
+
+                repository.delete(imageData);
+                response = Response.builder()
+                        .success(true)
+                        .message("Image data successfully deleted")
+                        .status_code(200)
+                        .build();
+            }
+
         else {
             response = Response.builder()
                     .status_code(404)

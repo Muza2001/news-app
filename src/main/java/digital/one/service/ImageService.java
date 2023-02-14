@@ -9,7 +9,7 @@ public interface ImageService {
 
     ResponseEntity<?> uploadImage(MultipartFile multipartFile) throws IOException;
 
-    ResponseEntity<?> downloadById(Long id);
+    ResponseEntity<?> findById(Long id);
 
     ResponseEntity<?> edit(Long id, MultipartFile file) throws IOException;
 

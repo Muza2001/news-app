@@ -49,7 +49,7 @@ public class SampleDataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        logger.info("Loading faker data");
+        /*logger.info("Loading faker data");
 
         // create 1 account
 
@@ -77,6 +77,6 @@ public class SampleDataLoader implements CommandLineRunner {
                         Instant.now(),
                         Instant.now()
                         ));
-        newsRepository.saveAll(news1.collect(Collectors.toList()));
+        newsRepository.saveAll(news1.collect(Collectors.toList()));*/
     }
 }

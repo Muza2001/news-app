@@ -2,10 +2,12 @@ package digital.one.controller;
 
 import digital.one.dto.request.*;
 import digital.one.service.NewsService;
+import digital.one.utils.ApiPageable;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 
 
 @RestController()
@@ -15,14 +17,12 @@ public class NewsController {
 
     private final NewsService newsService;
 
+    @ApiPageable
     @GetMapping("/paging")
-    public ResponseEntity<?> findAll(@RequestParam int page, @RequestParam int size){;
-        return ResponseEntity.status(200).body(newsService.findAllPagination(page,size));
-    }
-
-    @GetMapping("/searching/{title}")
-    public ResponseEntity<?> searching(@PathVariable String title){;
-        return ResponseEntity.status(200).body(newsService.searching(title));
+    public ResponseEntity<?> findAll(@RequestParam(required = false) String title,
+                                     @RequestParam(required = false) String category_name,
+                                     @ApiIgnore Pageable pageable){
+        return ResponseEntity.status(200).body(newsService.findAllPagination(title, pageable, category_name));
     }
 
     @GetMapping("/find_by_id/{id}")

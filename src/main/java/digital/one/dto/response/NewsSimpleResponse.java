@@ -1,6 +1,5 @@
 package digital.one.dto.response;
 
-import digital.one.model.ImageData;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,8 +24,6 @@ public class NewsSimpleResponse {
     private ImageDataResponse imageDataResponse;
 
     private Instant created_at;
-
-    private Instant updated_at;
 
     private List<CategoryResponse> categoryResponse = new ArrayList<>();
 

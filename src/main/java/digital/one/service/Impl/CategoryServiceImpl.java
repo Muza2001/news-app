@@ -9,6 +9,7 @@ import digital.one.repository.CategoryRepository;
 import digital.one.repository.NewsRepository;
 import digital.one.service.CategoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,7 +49,7 @@ public class CategoryServiceImpl implements CategoryService {
                     for (Category category1 : news.getCategory()) {
                         if (category1.equals(category)){
                             response = Response.builder()
-                                    .status_code(401)
+                                    .status_code(400)
                                     .message("This category already used please first delete news related to this category")
                                     .data(null)
                                     .success(false)
@@ -88,7 +89,7 @@ public class CategoryServiceImpl implements CategoryService {
             Category category = optionalCategory.get();
 
             if (!category.getName().equals(request.getName()))
-                category.setName(request.getName().toUpperCase());
+                category.setName(request.getName());
 
             Category save = repository.save(category);
             categoryResponse = CategoryResponse.builder()
@@ -121,7 +122,7 @@ public class CategoryServiceImpl implements CategoryService {
                     .build();
         }
         else {
-            category.setName(request.getName().toUpperCase());
+            category.setName(request.getName());
             Category save = repository.save(category);
             categoryResponse = CategoryResponse.builder()
                     .id(save.getId())
@@ -138,7 +139,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public ResponseEntity<?> getById(Long id) {
+    public ResponseEntity<?> findById(Long id) {
         Optional<Category> optionalCategory = repository.findById(id);
         Response response;
         CategoryResponse categoryResponse;
@@ -169,7 +170,9 @@ public class CategoryServiceImpl implements CategoryService {
     public ResponseEntity<?> findAll() {
         List<CategoryResponse> categoryResponses = new ArrayList<>();
         for (Category category : repository.findAll()) {
-            categoryResponses.add(new CategoryResponse(category.getId(),category.getName()));
+            if (category != null) {
+                categoryResponses.add(new CategoryResponse(category.getId(), category.getName()));
+            }
         }
         Response response = Response.builder()
                 .data(categoryResponses)

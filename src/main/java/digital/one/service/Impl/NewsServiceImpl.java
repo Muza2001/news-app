@@ -13,7 +13,7 @@ import digital.one.repository.NewsRepository;
 import digital.one.service.NewsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -85,11 +85,9 @@ public class NewsServiceImpl implements NewsService {
                             .size(imageData.getSize())
                             .originalName(imageData.getOriginalName())
                             .created_at(imageData.getCreated_at())
-                            .updated_at(imageData.getUpdated_at())
                             .build();
                 }
                 newsSimpleResponse = NewsSimpleResponse.builder()
-                        .updated_at(news.getUpdated_at())
                         .created_at(news.getCreated_at())
                         .imageDataResponse(imageDataResponse)
                         .categoryResponse(categoryResponses)
@@ -100,7 +98,6 @@ public class NewsServiceImpl implements NewsService {
             }
             else {
                 newsSimpleResponse = NewsSimpleResponse.builder()
-                        .updated_at(news.getUpdated_at())
                         .created_at(news.getCreated_at())
                         .categoryResponse(null)
                         .description(news.getDescription())
@@ -141,7 +138,6 @@ public class NewsServiceImpl implements NewsService {
                         .size(imageData.getSize())
                         .originalName(imageData.getOriginalName())
                         .created_at(imageData.getCreated_at())
-                        .updated_at(imageData.getUpdated_at())
                         .build();
             }
 
@@ -176,6 +172,7 @@ public class NewsServiceImpl implements NewsService {
                             .infoResponses(basicInfoResponseWithoutNews)
                             .title(news.getTitle())
                             .id(news.getId())
+                            .created_at(news.getCreated_at())
                             .imageDataResponse(imageDataResponse)
                             .description(news.getDescription())
                             .build();
@@ -231,7 +228,6 @@ public class NewsServiceImpl implements NewsService {
                         imageDataResponse = ImageDataResponse.builder()
                                 .id(imageData.getId())
                                 .data(imageData.getData())
-                                .updated_at(Instant.now())
                                 .created_at(imageData.getCreated_at())
                                 .name(imageData.getName())
                                 .contentType(imageData.getContentType())
@@ -261,10 +257,12 @@ public class NewsServiceImpl implements NewsService {
             repository.save(news);
             newsResponse = NewsResponse.builder()
                     .title(news.getTitle())
+                    .description(news.getDescription())
                     .imageDataResponse(imageDataResponse)
                     .infoResponses(basicInfoResponseWithoutNews)
                     .categoryResponse(categoryResponses)
                     .id(news.getId())
+                    .created_at(news.getCreated_at())
                     .build();
             response = Response.builder()
                     .data(newsResponse)
@@ -291,7 +289,6 @@ public class NewsServiceImpl implements NewsService {
                                         .originalName(info.getImageData().getOriginalName())
                                         .name(info.getImageData().getName())
                                         .created_at(info.getImageData().getCreated_at())
-                                        .updated_at(info.getImageData().getUpdated_at())
                                         .data(info.getImageData().getData())
                                         .id(info.getImageData().getId())
                                         .build())
@@ -301,17 +298,130 @@ public class NewsServiceImpl implements NewsService {
         return basicInfoResponseWithoutNews;
     }
 
+    public List<NewsResponse> newsResponses(List<News> newsList){
+        List<NewsResponse> newsResponses = new ArrayList<>();
+        if (newsList.size() > 0){
+            for (News news: newsList) {
+                if (news != null){
+                    newsResponses.add(NewsResponse.builder()
+                            .title(news.getTitle())
+                            .description(news.getDescription())
+                            .imageDataResponse(getImageDataResponse(news.getImageData()))
+                            .infoResponses(getBasicInfoResponse(news))
+                            .categoryResponse(getCategoryResponse(news.getCategory()))
+                            .id(news.getId())
+                            .created_at(news.getCreated_at())
+                            .build());
+                }
+            }
+        }
+        else {
+            newsResponses = null;
+        }
+        return newsResponses;
+    }
+
+    private List<CategoryResponse> getCategoryResponse(List<Category> category) {
+        List<CategoryResponse> categoryResponses = new ArrayList<>();
+        if (category.size() > 0){
+            for (Category ca: category) {
+                if (ca != null){
+                    categoryResponses.add(CategoryResponse.builder()
+                            .id(ca.getId())
+                            .name(ca.getName())
+                            .build());
+                }
+            }
+        }
+        else {
+            categoryResponses = null;
+        }
+        return categoryResponses;
+    }
+
+    private List<BasicInfoResponseWithoutNews> getBasicInfoResponse(News news) {
+        Optional<List<BasicInformation>> byNewsId = basicInformationRepository.findByNewsId(news.getId());
+        return byNewsId.map(this::getBasicInfoResponseWithoutNews).orElse(null);
+    }
+
+    private ImageDataResponse getImageDataResponse(ImageData imageData) {
+        ImageDataResponse imageDataResponse;
+        if (imageData != null){
+            imageDataResponse = ImageDataResponse.builder()
+                    .id(imageData.getId())
+                    .data(imageData.getData())
+                    .name(imageData.getName())
+                    .originalName(imageData.getOriginalName())
+                    .contentType(imageData.getContentType())
+                    .size(imageData.getSize())
+                    .created_at(imageData.getCreated_at())
+                    .build();
+        }
+        else {
+            imageDataResponse = null;
+        }
+        return imageDataResponse;
+    }
+
     @Override
-    public ResponseEntity<?> findAllPagination(int page, int size) {
-        PageRequest of = PageRequest.of(page, size);
-        Page<News> newsPage = repository.findAll(of);
-        Response response = Response.builder()
-                .success(true)
-                .data(newsPage)
-                .message("Paging")
-                .status_code(200)
-                .build();
-        return ResponseEntity.status(200).body(response);
+    public ResponseEntity<?> findAllPagination(String title, Pageable pageable, String category_name) {
+        Response response;
+        PageResponse pageResponse = new PageResponse();
+        if (title == null && category_name == null){
+            Page<News> allByPaginationForSort =
+                    repository.findAllByPaginationForSort(pageable);
+            pageResponse.setContent(newsResponses(allByPaginationForSort.getContent()));
+            pageResponse.setPageNumber(allByPaginationForSort.getNumber());
+            pageResponse.setTotalPages(allByPaginationForSort.getTotalPages());
+            pageResponse.setSize(allByPaginationForSort.getSize());
+            pageResponse.setTotalElements(allByPaginationForSort.getTotalElements());
+            response = Response.builder()
+                    .data(pageResponse)
+                    .success(true)
+                    .message("Paging")
+                    .status_code(200)
+                    .build();
+
+        } else if (title == null) {
+            Optional<Category> byName = categoryRepository.findByName(category_name);
+            if (byName.isPresent()){
+                Category category = byName.get();
+                Page<News> allByPagination = repository.findAllByCategoryOrderByIdDesc(pageable,category);
+                pageResponse.setContent(newsResponses(allByPagination.getContent()));
+                pageResponse.setPageNumber(allByPagination.getNumber());
+                pageResponse.setTotalPages(allByPagination.getTotalPages());
+                pageResponse.setSize(allByPagination.getSize());
+                pageResponse.setTotalElements(allByPagination.getTotalElements());
+                response = Response.builder()
+                        .data(allByPagination)
+                        .status_code(200)
+                        .success(true)
+                        .message("Paging")
+                        .build();
+            }
+            else {
+                response = Response.builder()
+                        .success(false)
+                        .message("Category name not found")
+                        .status_code(404)
+                        .build();
+            }
+        }  else {
+            Page<News> allByTitleContainsAndOrderByIdDesc =
+                    repository.findAllByTitleContainsOrderByIdDesc(title, pageable);
+            pageResponse.setContent(newsResponses(allByTitleContainsAndOrderByIdDesc.getContent()));
+            pageResponse.setPageNumber(allByTitleContainsAndOrderByIdDesc.getNumber());
+            pageResponse.setTotalPages(allByTitleContainsAndOrderByIdDesc.getTotalPages());
+            pageResponse.setSize(allByTitleContainsAndOrderByIdDesc.getSize());
+            pageResponse.setTotalElements(allByTitleContainsAndOrderByIdDesc.getTotalElements());
+            response = Response.builder()
+                    .data(allByTitleContainsAndOrderByIdDesc)
+                    .success(true)
+                    .message("Paging")
+                    .status_code(200)
+                    .build();
+        }
+        return ResponseEntity.status(response.getStatus_code()).body(response);
     }
 
     @Override
@@ -334,29 +444,6 @@ public class NewsServiceImpl implements NewsService {
                     .status_code(200)
                     .message("News successfully deleted")
                     .success(true)
-                    .build();
-        }
-        return ResponseEntity.status(response.getStatus_code()).body(response);
-    }
-
-    @Override
-    public ResponseEntity<?> searching(String title) {
-        Optional<List<News>> byTitleContains = repository.findNewsByTitleContaining(title);
-        Response response;
-        if (byTitleContains.isPresent()) {
-            List<News> news = byTitleContains.get();
-            response = Response.builder()
-                    .data(Collections.singletonList(news))
-                    .message("Searching result")
-                    .status_code(200)
-                    .success(true)
-                    .build();
-        }
-        else {
-            response = Response.builder()
-                    .message("Something wrong")
-                    .status_code(404)
-                    .success(false)
                     .build();
         }
         return ResponseEntity.status(response.getStatus_code()).body(response);

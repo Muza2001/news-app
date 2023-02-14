@@ -1,6 +1,7 @@
 package digital.one.service;
 
 import digital.one.dto.request.*;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 public interface NewsService {
@@ -14,8 +15,6 @@ public interface NewsService {
 
     ResponseEntity<?> deleteById(Long id);
 
-    ResponseEntity<?> findAllPagination(int page, int size);
+    ResponseEntity<?> findAllPagination(String title, Pageable pageable, String category_name);
 
-
-    ResponseEntity<?> searching(String title);
 }

@@ -27,6 +27,4 @@ public class ImageDataResponse {
 
     private Instant created_at;
 
-    private Instant updated_at;
-
 }

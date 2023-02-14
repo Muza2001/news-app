@@ -20,9 +20,9 @@ public class ImageController {
         return ResponseEntity.status(201).body(service.uploadImage(file));
     }
 
-    @GetMapping("/get_by_id/{id}")
+    @GetMapping("/find_by_id/{id}")
     public ResponseEntity<?> download(@PathVariable Long id) {
-        return ResponseEntity.ok().body(service.downloadById(id));
+        return ResponseEntity.ok().body(service.findById(id));
     }
 
     @PutMapping("/edit/{id}")
