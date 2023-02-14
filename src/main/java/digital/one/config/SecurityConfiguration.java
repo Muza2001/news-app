@@ -103,6 +103,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .cors()
+                .configurationSource(request -> {
+                    CorsConfiguration configuration = new CorsConfiguration();
+                         configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
+                         configuration.setAllowedMethods(Collections.singletonList("GET"));
+                         configuration.setAllowedHeaders(Collections.singletonList("*"));
+                         configuration.setAllowCredentials(true);
+                    return configuration;
+        })
                 .and()
                 .csrf()
                 .disable()
