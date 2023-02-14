@@ -37,8 +37,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @EnableWebSecurity
 @Configuration
@@ -64,6 +63,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
             "/v3/api-docs/**",
             "/swagger-ui/**"
     };
+
+    public static Set<String> methods = new HashSet<>();
+
 
     private final AuthenticationServiceImpl myUserService;
 
@@ -98,19 +100,18 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
         return new BCryptPasswordEncoder();
     }
 
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .cors()
-                /*.configurationSource(request -> {
+                .configurationSource(request -> {
                     CorsConfiguration configuration = new CorsConfiguration();
                          configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
-                         configuration.setAllowedMethods(Collections.singletonList("GET"));
+                         configuration.setAllowedMethods((List<String>) methods);
                          configuration.setAllowedHeaders(Collections.singletonList("*"));
                          configuration.setAllowCredentials(true);
                     return configuration;
-        })*/
+        })
                 .and()
                 .csrf()
                 .disable()

@@ -49,6 +49,10 @@ public class SampleDataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        SecurityConfiguration.methods.add("GET");
+        SecurityConfiguration.methods.add("POST");
+        SecurityConfiguration.methods.add("PUT");
+        SecurityConfiguration.methods.add("DELETE");
         /*logger.info("Loading faker data");
 
         // create 1 account
