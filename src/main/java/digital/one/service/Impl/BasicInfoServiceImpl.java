@@ -24,6 +24,7 @@ import java.util.Optional;
 public class BasicInfoServiceImpl implements BasicInfoService {
 
     private final BasicInformationRepository repository;
+
     private final NewsRepository newsRepository;
 
     private final ImageDataRepository imageDataRepository;
@@ -33,22 +34,20 @@ public class BasicInfoServiceImpl implements BasicInfoService {
         Optional<News> optionalNews = newsRepository.findById(requests.getNews_id());
         Optional<ImageData> byId = imageDataRepository.findById(requests.getImage_id());
         Response response;
+
         if (!optionalNews.isPresent()){
             response = Response.builder()
                     .message("News id not found")
                     .status_code(401)
                     .success(false)
                     .build();
-        } else if (!byId.isPresent()) {
-            response = Response.builder()
-                    .message("Image id not found")
-                    .status_code(404)
-                    .success(false)
-                    .build();
         } else {
+            ImageDataResponse newsImageDataResponse;
+            ImageDataResponse basicInfoImageDataResponse;
+            ImageData basicInfoImageData;
+            basicInfoImageData = byId.orElse(null);
             News news = optionalNews.get();
             ImageData newsImageData = news.getImageData();
-            ImageData basicInfoImageData = byId.get();
             BasicInformation info = repository.save(BasicInformation.builder()
                     .imageData(basicInfoImageData)
                     .message(requests.getMessage())
@@ -63,25 +62,10 @@ public class BasicInfoServiceImpl implements BasicInfoService {
                             .build());
                 }
             }
-            ImageDataResponse newsImageDataResponse = ImageDataResponse.builder()
-                    .id(newsImageData.getId())
-                    .data(newsImageData.getData())
-                    .created_at(newsImageData.getCreated_at())
-                    .name(newsImageData.getName())
-                    .contentType(newsImageData.getContentType())
-                    .originalName(newsImageData.getOriginalName())
-                    .size(newsImageData.getSize())
-                    .build();
+            newsImageDataResponse = imageDataResponse(newsImageData);
 
-            ImageDataResponse basicInfoImageDataResponse = ImageDataResponse.builder()
-                    .id(basicInfoImageData.getId())
-                    .data(basicInfoImageData.getData())
-                    .created_at(basicInfoImageData.getCreated_at())
-                    .name(basicInfoImageData.getName())
-                    .contentType(basicInfoImageData.getContentType())
-                    .originalName(basicInfoImageData.getOriginalName())
-                    .size(basicInfoImageData.getSize())
-                    .build();
+            basicInfoImageDataResponse = imageDataResponse(basicInfoImageData);
+
             news.setUpdated_at(Instant.now());
 
             BasicInfoResponse basicInfoResponse = BasicInfoResponse.builder()
@@ -106,6 +90,22 @@ public class BasicInfoServiceImpl implements BasicInfoService {
                     .build();
         }
         return ResponseEntity.status(response.getStatus_code()).body(response);
+    }
+
+    public ImageDataResponse imageDataResponse(ImageData imageData){
+        ImageDataResponse imageDataResponse = null;
+        if (imageData != null){
+             imageDataResponse = ImageDataResponse.builder()
+                    .id(imageData.getId())
+                    .data(imageData.getData())
+                    .created_at(imageData.getCreated_at())
+                    .name(imageData.getName())
+                    .contentType(imageData.getContentType())
+                    .originalName(imageData.getOriginalName())
+                    .size(imageData.getSize())
+                    .build();
+        }
+        return imageDataResponse;
     }
 
     @Override
