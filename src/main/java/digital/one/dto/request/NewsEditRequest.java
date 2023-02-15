@@ -20,6 +20,8 @@ public class NewsEditRequest {
 
     private Long image_id;
 
+    private boolean isSelected = false;
+
     private List<Long> category_ids = new ArrayList<>();
 
 }

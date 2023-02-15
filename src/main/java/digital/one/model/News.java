@@ -46,6 +46,8 @@ public class News {
 
     private Instant updated_at;
 
+    private boolean isSelected;
+
     @ManyToOne
     private ImageData imageData;
 

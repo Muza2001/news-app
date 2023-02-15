@@ -21,6 +21,8 @@ public class NewsSimpleResponse {
 
     private String description;
 
+    private boolean isSelected;
+
     private ImageDataResponse imageDataResponse;
 
     private Instant created_at;

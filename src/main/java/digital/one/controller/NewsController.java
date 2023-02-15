@@ -25,6 +25,11 @@ public class NewsController {
         return ResponseEntity.status(200).body(newsService.findAllPagination(title, pageable, category_name));
     }
 
+    @GetMapping("/selected")
+    public ResponseEntity<?> findByIsSelectedLimit10(){
+        return ResponseEntity.status(200).body(newsService.isSelected());
+    }
+
     @GetMapping("/find_by_id/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id){
         return ResponseEntity.status(200).body(newsService.findById(id));

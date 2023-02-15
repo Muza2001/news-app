@@ -24,6 +24,6 @@ public class PageResponse {
 
     private Integer pageNumber;
 
-    private Integer getNumberOfElements;
+    private Integer numberOfElements;
 
 }

@@ -56,6 +56,7 @@ public class NewsServiceImpl implements NewsService {
             news.setCreated_at(Instant.now());
             news.setUpdated_at(Instant.now());
             news.setTitle(request.getTitle());
+            news.setSelected(request.isSelected());
             news.setDescription(request.getDescription());
             if (request.getImage_id() > 0 && request.getImage_id() != null){
                 Optional<ImageData> byId = imageDataRepository.findById(request.getImage_id());
@@ -77,20 +78,13 @@ public class NewsServiceImpl implements NewsService {
                 ImageDataResponse imageDataResponse = null;
                 if (news.getImageData() != null){
                     ImageData imageData = news.getImageData();
-                    imageDataResponse = ImageDataResponse.builder()
-                            .id(imageData.getId())
-                            .name(imageData.getName())
-                            .data(imageData.getData())
-                            .contentType(imageData.getContentType())
-                            .size(imageData.getSize())
-                            .originalName(imageData.getOriginalName())
-                            .created_at(imageData.getCreated_at())
-                            .build();
+                    imageDataResponse = getImageDataResponse(imageData);
                 }
                 newsSimpleResponse = NewsSimpleResponse.builder()
                         .created_at(news.getCreated_at())
                         .imageDataResponse(imageDataResponse)
                         .categoryResponse(categoryResponses)
+                        .isSelected(news.isSelected())
                         .description(news.getDescription())
                         .title(news.getTitle())
                         .id(save.getId())
@@ -101,6 +95,7 @@ public class NewsServiceImpl implements NewsService {
                         .created_at(news.getCreated_at())
                         .categoryResponse(null)
                         .description(news.getDescription())
+                        .isSelected(news.isSelected())
                         .title(news.getTitle())
                         .id(save.getId())
                         .build();
@@ -130,15 +125,7 @@ public class NewsServiceImpl implements NewsService {
             News news = optionalNews.get();
             ImageData imageData = news.getImageData();
             if (imageData != null) {
-                imageDataResponse = ImageDataResponse.builder()
-                        .id(imageData.getId())
-                        .name(imageData.getName())
-                        .data(imageData.getData())
-                        .contentType(imageData.getContentType())
-                        .size(imageData.getSize())
-                        .originalName(imageData.getOriginalName())
-                        .created_at(imageData.getCreated_at())
-                        .build();
+                imageDataResponse = getImageDataResponse(imageData);
             }
 
             List<CategoryResponse> categoryResponse = new ArrayList<>();
@@ -159,6 +146,7 @@ public class NewsServiceImpl implements NewsService {
                             .infoResponses(null)
                             .title(news.getTitle())
                             .id(news.getId())
+                            .isSelected(news.isSelected())
                             .imageDataResponse(imageDataResponse)
                             .description(news.getDescription())
                             .build();
@@ -172,6 +160,7 @@ public class NewsServiceImpl implements NewsService {
                             .infoResponses(basicInfoResponseWithoutNews)
                             .title(news.getTitle())
                             .id(news.getId())
+                            .isSelected(news.isSelected())
                             .created_at(news.getCreated_at())
                             .imageDataResponse(imageDataResponse)
                             .description(news.getDescription())
@@ -217,6 +206,9 @@ public class NewsServiceImpl implements NewsService {
             if (!news.getTitle().equals(request.getTitle()))
                 news.setTitle(request.getTitle());
 
+            if (news.isSelected() != request.isSelected())
+                news.setSelected(request.isSelected());
+
             if (!news.getDescription().equals(request.getDescription()))
                 news.setDescription(request.getDescription());
 
@@ -225,15 +217,7 @@ public class NewsServiceImpl implements NewsService {
                 if (byId.isPresent()){
                     ImageData imageData = byId.get();
                         news.setImageData(imageData);
-                        imageDataResponse = ImageDataResponse.builder()
-                                .id(imageData.getId())
-                                .data(imageData.getData())
-                                .created_at(imageData.getCreated_at())
-                                .name(imageData.getName())
-                                .contentType(imageData.getContentType())
-                                .originalName(imageData.getOriginalName())
-                                .size(imageData.getSize())
-                                .build();
+                        imageDataResponse = getImageDataResponse(imageData);
                 }
             }
 
@@ -261,6 +245,7 @@ public class NewsServiceImpl implements NewsService {
                     .imageDataResponse(imageDataResponse)
                     .infoResponses(basicInfoResponseWithoutNews)
                     .categoryResponse(categoryResponses)
+                    .isSelected(news.isSelected())
                     .id(news.getId())
                     .created_at(news.getCreated_at())
                     .build();
@@ -283,15 +268,7 @@ public class NewsServiceImpl implements NewsService {
                         BasicInfoResponseWithoutNews.builder()
                                 .id(info.getId())
                                 .message(info.getMessage())
-                                .imageDataResponse(ImageDataResponse.builder()
-                                        .contentType(info.getImageData().getContentType())
-                                        .size(info.getImageData().getSize())
-                                        .originalName(info.getImageData().getOriginalName())
-                                        .name(info.getImageData().getName())
-                                        .created_at(info.getImageData().getCreated_at())
-                                        .data(info.getImageData().getData())
-                                        .id(info.getImageData().getId())
-                                        .build())
+                                .imageDataResponse(getImageDataResponse(info.getImageData()))
                                 .build());
             }
         }
@@ -308,6 +285,7 @@ public class NewsServiceImpl implements NewsService {
                             .description(news.getDescription())
                             .imageDataResponse(getImageDataResponse(news.getImageData()))
                             .infoResponses(getBasicInfoResponse(news))
+                            .isSelected(news.isSelected())
                             .categoryResponse(getCategoryResponse(news.getCategory()))
                             .id(news.getId())
                             .created_at(news.getCreated_at())
@@ -364,17 +342,37 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
+    public ResponseEntity<?> isSelected() {
+        Optional<List<News>> byIsSelectedToTrueLimit10 = repository.findByIsSelectedToTrueLimit10();
+        List<NewsResponse> newsResponses;
+        Response response;
+        if (byIsSelectedToTrueLimit10.isPresent()){
+            newsResponses = newsResponses(byIsSelectedToTrueLimit10.get());
+            response = Response.builder()
+                    .status_code(200)
+                    .message("Selected news")
+                    .success(true)
+                    .data(newsResponses)
+                    .build();
+        }
+        else {
+            response = Response.builder()
+                    .data(null)
+                    .status_code(200)
+                    .message("Selected news not found")
+                    .build();
+        }
+        return ResponseEntity.status(response.getStatus_code()).body(response);
+    }
+
+    @Override
     public ResponseEntity<?> findAllPagination(String title, Pageable pageable, String category_name) {
         Response response;
-        PageResponse pageResponse = new PageResponse();
+        PageResponse pageResponse;
         if (title == null && category_name == null){
             Page<News> allByPaginationForSort =
                     repository.findAllByPaginationForSort(pageable);
-            pageResponse.setContent(newsResponses(allByPaginationForSort.getContent()));
-            pageResponse.setPageNumber(allByPaginationForSort.getNumber());
-            pageResponse.setTotalPages(allByPaginationForSort.getTotalPages());
-            pageResponse.setSize(allByPaginationForSort.getSize());
-            pageResponse.setTotalElements(allByPaginationForSort.getTotalElements());
+            pageResponse = pageResponse(allByPaginationForSort);
             response = Response.builder()
                     .data(pageResponse)
                     .success(true)
@@ -387,13 +385,9 @@ public class NewsServiceImpl implements NewsService {
             if (byName.isPresent()){
                 Category category = byName.get();
                 Page<News> allByPagination = repository.findAllByCategoryOrderByIdDesc(pageable,category);
-                pageResponse.setContent(newsResponses(allByPagination.getContent()));
-                pageResponse.setPageNumber(allByPagination.getNumber());
-                pageResponse.setTotalPages(allByPagination.getTotalPages());
-                pageResponse.setSize(allByPagination.getSize());
-                pageResponse.setTotalElements(allByPagination.getTotalElements());
+                pageResponse = pageResponse(allByPagination);
                 response = Response.builder()
-                        .data(allByPagination)
+                        .data(pageResponse)
                         .status_code(200)
                         .success(true)
                         .message("Paging")
@@ -408,20 +402,32 @@ public class NewsServiceImpl implements NewsService {
             }
         }  else {
             Page<News> allByTitleContainsAndOrderByIdDesc =
-                    repository.findAllByTitleContainsOrderByIdDesc(title, pageable);
-            pageResponse.setContent(newsResponses(allByTitleContainsAndOrderByIdDesc.getContent()));
-            pageResponse.setPageNumber(allByTitleContainsAndOrderByIdDesc.getNumber());
-            pageResponse.setTotalPages(allByTitleContainsAndOrderByIdDesc.getTotalPages());
-            pageResponse.setSize(allByTitleContainsAndOrderByIdDesc.getSize());
-            pageResponse.setTotalElements(allByTitleContainsAndOrderByIdDesc.getTotalElements());
+                    repository.findAllSearchingByTitleAndDescription(title, pageable);
+            pageResponse = pageResponse(allByTitleContainsAndOrderByIdDesc);
             response = Response.builder()
-                    .data(allByTitleContainsAndOrderByIdDesc)
+                    .data(pageResponse)
                     .success(true)
                     .message("Paging")
                     .status_code(200)
                     .build();
         }
         return ResponseEntity.status(response.getStatus_code()).body(response);
+    }
+
+    public PageResponse pageResponse(Page<News> allByTitleContainsAndOrderByIdDesc){
+        PageResponse pageResponse = new PageResponse();
+        if (allByTitleContainsAndOrderByIdDesc != null && allByTitleContainsAndOrderByIdDesc.getSize() > 0) {
+            pageResponse.setContent(newsResponses(allByTitleContainsAndOrderByIdDesc.getContent()));
+            pageResponse.setPageNumber(allByTitleContainsAndOrderByIdDesc.getNumber());
+            pageResponse.setTotalPages(allByTitleContainsAndOrderByIdDesc.getTotalPages());
+            pageResponse.setSize(allByTitleContainsAndOrderByIdDesc.getSize());
+            pageResponse.setNumberOfElements(allByTitleContainsAndOrderByIdDesc.getNumberOfElements());
+            pageResponse.setTotalElements(allByTitleContainsAndOrderByIdDesc.getTotalElements());
+        }
+        else {
+            pageResponse = null;
+        }
+        return pageResponse;
     }
 
     @Override

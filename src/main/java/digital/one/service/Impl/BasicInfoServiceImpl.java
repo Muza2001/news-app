@@ -44,8 +44,7 @@ public class BasicInfoServiceImpl implements BasicInfoService {
         } else {
             ImageDataResponse newsImageDataResponse;
             ImageDataResponse basicInfoImageDataResponse;
-            ImageData basicInfoImageData;
-            basicInfoImageData = byId.orElse(null);
+            ImageData basicInfoImageData = byId.orElse(null);
             News news = optionalNews.get();
             ImageData newsImageData = news.getImageData();
             BasicInformation info = repository.save(BasicInformation.builder()

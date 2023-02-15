@@ -48,6 +48,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
             "/api/v1/auth/login",
             "/api/v1/news/find_by_id/*",
             "/api/v1/news/paging",
+            "/api/v1/news/selected",
             "/api/v1/image/find_by_id/*",
             "/api/v1/category/find_all",
             "/api/v1/category/find_by_id/*",

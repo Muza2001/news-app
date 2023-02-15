@@ -23,6 +23,8 @@ public class NewsResponse {
 
     private ImageDataResponse imageDataResponse;
 
+    private boolean isSelected;
+
     private List<CategoryResponse> categoryResponse = new ArrayList<>();
 
     private List<BasicInfoResponseWithoutNews> infoResponses = new ArrayList<>();

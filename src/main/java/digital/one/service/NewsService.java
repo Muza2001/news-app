@@ -17,4 +17,5 @@ public interface NewsService {
 
     ResponseEntity<?> findAllPagination(String title, Pageable pageable, String category_name);
 
+    ResponseEntity<?> isSelected();
 }
