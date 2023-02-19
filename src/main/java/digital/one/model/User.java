@@ -16,11 +16,10 @@ import java.util.Objects;
 @Table(name = "users")
 public class User {
 
-    public User(String full_name, String password, String username, String email, Instant expiration, Boolean isEnabled) {
+    public User(String full_name, String password, String username, Instant expiration, Boolean isEnabled) {
         this.full_name = full_name;
         this.password = password;
         this.username = username;
-        this.email = email;
         this.expiration = expiration;
         this.isEnabled = isEnabled;
     }
@@ -35,9 +34,6 @@ public class User {
 
     @Column(unique = true, name = "username")
     private String username;
-
-    @Column(unique = true, name = "email")
-    private String email;
 
     private Instant expiration;
 

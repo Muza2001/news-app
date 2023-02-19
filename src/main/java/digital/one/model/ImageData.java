@@ -22,7 +22,7 @@ public class ImageData {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "original_name",nullable = false, unique = true)
+    @Column(name = "original_name")
     private String originalName;
 
     @Column(name = "content_type")

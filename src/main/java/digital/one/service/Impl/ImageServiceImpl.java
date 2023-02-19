@@ -42,15 +42,7 @@ public class ImageServiceImpl implements ImageService {
                     .data(null)
                     .status_code(404)
                     .build();
-        } else if (repository.existsByOriginalName(originalFilename)) {
-            response = Response.builder()
-                    .message("File name already exists this database")
-                    .success(false)
-                    .data(null)
-                    .status_code(404)
-                    .build();
-
-        } else {
+        }  else {
             ImageData save = repository.save(new ImageData(
                     multipartFile.getName(),
                     originalFilename,

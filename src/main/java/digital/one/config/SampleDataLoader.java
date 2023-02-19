@@ -1,12 +1,8 @@
 package digital.one.config;
 
 import com.github.javafaker.Faker;
-import digital.one.model.Category;
-import digital.one.model.ImageData;
-import digital.one.model.News;
 import digital.one.model.User;
 import digital.one.repository.CategoryRepository;
-import digital.one.repository.ImageDataRepository;
 import digital.one.repository.NewsRepository;
 import digital.one.repository.UserRepository;
 import org.slf4j.Logger;
@@ -16,35 +12,21 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 
 @Component
 public class SampleDataLoader implements CommandLineRunner {
 
     private Logger logger = LoggerFactory.getLogger(SampleDataLoader.class);
-    private final NewsRepository newsRepository;
-
     private final PasswordEncoder passwordEncoder;
 
     private final UserRepository userRepository;
 
-    private final CategoryRepository categoryRepository;
 
-
-    private final Faker faker;
-
-    public SampleDataLoader(NewsRepository newsRepository,
-                            PasswordEncoder passwordEncoder,
-                            UserRepository userRepository,
-                            CategoryRepository categoryRepository, Faker faker) {
-        this.newsRepository = newsRepository;
+    public SampleDataLoader(PasswordEncoder passwordEncoder,
+                            UserRepository userRepository) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
-        this.categoryRepository = categoryRepository;
-        this.faker = faker;
     }
 
     @Override
@@ -54,29 +36,12 @@ public class SampleDataLoader implements CommandLineRunner {
         // create 1 account
 
         userRepository.save(new User(
-                "Muzaffar Mahmudov",
+                "Muzaffar",
                 passwordEncoder.encode("123"),
                 "muza",
-                "muza5660@gmail.com",
                 Instant.now(),
                 true
         ));
-        Stream<Category> categoryStream = IntStream.rangeClosed(1,10)
-                        .mapToObj(category -> new Category(
-                                faker.name().name().toUpperCase()
-                        ));
 
-        categoryRepository.saveAll(categoryStream.collect(Collectors.toList()));
-
-        // create 100 rows of news in the database
-
-        Stream<News> news1 = IntStream.rangeClosed(1, 100)
-                .mapToObj(i -> new News(
-                    faker.name().title(),
-                    faker.weather().description(),
-                        Instant.now(),
-                        Instant.now()
-                        ));
-        newsRepository.saveAll(news1.collect(Collectors.toList()));
     }
 }

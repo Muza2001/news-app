@@ -1,21 +1,18 @@
 package digital.one.dto.request;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserRequest {
+public class UserEditPassword {
 
-    private String full_name;
+    private String confirm_password;
 
-    private String password;
+    private String new_password;
 
-    private String username;
+    private String retry_password;
 
 }
