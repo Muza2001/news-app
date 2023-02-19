@@ -1,9 +1,6 @@
 package digital.one.config;
 
-import com.github.javafaker.Faker;
 import digital.one.model.User;
-import digital.one.repository.CategoryRepository;
-import digital.one.repository.NewsRepository;
 import digital.one.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

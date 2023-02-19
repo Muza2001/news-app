@@ -1,10 +1,7 @@
 package digital.one.service.Impl;
 
-import digital.one.dto.request.AuthenticationRequest;
-import digital.one.dto.request.UserEditPassword;
-import digital.one.dto.request.UserEditRequest;
+import digital.one.dto.request.*;
 import digital.one.dto.response.AuthenticationResponse;
-import digital.one.dto.request.UserRequest;
 import digital.one.dto.response.Response;
 import digital.one.dto.response.UserResponse;
 import digital.one.model.User;
@@ -24,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -95,7 +93,7 @@ public class AuthenticationServiceImpl implements AuthenticationService, UserDet
                 .username(dto.getUsername())
                 .expirationData(Instant.now().plusMillis(18_000_000L))
                 .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(201).body(response);
     }
 
     @Override
@@ -147,11 +145,10 @@ public class AuthenticationServiceImpl implements AuthenticationService, UserDet
     }
 
     @Override
-    public ResponseEntity<?> edit(Long id, UserEditRequest request) {
-        Optional<User> byId = userRepository.findById(id);
+    public ResponseEntity<?> edit(UserEditRequest request) {
+        User user = getCurrentUser();
         Response response;
-        if (byId.isPresent()){
-            User user = byId.get();
+        if (user != null){
             UserResponse userResponse;
             if (!user.getUsername().equals(request.getUsername())){
                 if (userRepository.existsByUsername(request.getUsername())){
@@ -192,14 +189,18 @@ public class AuthenticationServiceImpl implements AuthenticationService, UserDet
         return ResponseEntity.status(response.getStatus_code()).body(response);
     }
 
-    @Override
-    public ResponseEntity<?> editPassword(Long id, UserEditPassword userEditPassword) {
-        Optional<User> byId = userRepository.findById(id);
-        Response response;
-        if (byId.isPresent()) {
-            User user = byId.get();
-            UserResponse userResponse;
+    public User getCurrentUser() {
+        Jwt principal = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userRepository.findByUsername(principal.getSubject()).orElseThrow(()
+                -> new UsernameNotFoundException("username Not found"));
+    }
 
+    @Override
+    public ResponseEntity<?> editPassword(UserEditPassword userEditPassword) {
+        User user = getCurrentUser();
+        Response response;
+        if (user != null) {
+            UserResponse userResponse;
             if (user.getPassword().equals(encoder.encode(userEditPassword.getConfirm_password()))) {
                 if (userEditPassword.getNew_password().equals(userEditPassword.getRetry_password())) {
                     user.setPassword(encoder.encode(userEditPassword.getNew_password()));
@@ -263,5 +264,11 @@ public class AuthenticationServiceImpl implements AuthenticationService, UserDet
                     .build();
         }
         return ResponseEntity.status(response.getStatus_code()).body(response);
+    }
+
+    @Override
+    public ResponseEntity<?> logout(RefreshTokenRequest request) {
+        refreshTokenService.refreshTokenDelete(request);
+        return ResponseEntity.status(200).body("Successfully logged out");
     }
 }

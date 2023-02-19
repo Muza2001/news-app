@@ -1,9 +1,6 @@
 package digital.one.service;
 
-import digital.one.dto.request.AuthenticationRequest;
-import digital.one.dto.request.UserEditPassword;
-import digital.one.dto.request.UserEditRequest;
-import digital.one.dto.request.UserRequest;
+import digital.one.dto.request.*;
 import org.springframework.http.ResponseEntity;
 
 public interface AuthenticationService {
@@ -13,9 +10,11 @@ public interface AuthenticationService {
 
     ResponseEntity<?> findById(Long id);
 
-    ResponseEntity<?> edit(Long id, UserEditRequest request);
+    ResponseEntity<?> edit(UserEditRequest request);
 
-    ResponseEntity<?> editPassword(Long id, UserEditPassword userEditPassword);
+    ResponseEntity<?> editPassword(UserEditPassword userEditPassword);
 
     ResponseEntity<?> delete(Long id);
+
+    ResponseEntity<?> logout(RefreshTokenRequest request);
 }

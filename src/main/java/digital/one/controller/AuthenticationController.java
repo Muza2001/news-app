@@ -1,9 +1,6 @@
 package digital.one.controller;
 
-import digital.one.dto.request.AuthenticationRequest;
-import digital.one.dto.request.UserEditPassword;
-import digital.one.dto.request.UserEditRequest;
-import digital.one.dto.request.UserRequest;
+import digital.one.dto.request.*;
 import digital.one.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,17 +25,17 @@ public class AuthenticationController {
 
     @GetMapping("/find_by_id/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id){
-        return ResponseEntity.status(201).body(service.findById(id));
+        return ResponseEntity.status(200).body(service.findById(id));
     }
 
-    @PutMapping("/edit/{user_id}")
-    public ResponseEntity<?> edit(@PathVariable("user_id") Long id, @RequestBody UserEditRequest request){
-        return ResponseEntity.status(200).body(service.edit(id,request));
+    @PutMapping("/edit")
+    public ResponseEntity<?> edit(@RequestBody UserEditRequest request){
+        return ResponseEntity.status(200).body(service.edit(request));
     }
 
-    @PutMapping("/edit_password/{id}")
-    public ResponseEntity<?> editPassword(@PathVariable Long id, UserEditPassword userEditPassword){
-        return ResponseEntity.status(200).body(service.editPassword(id, userEditPassword));
+    @PutMapping("/edit_password")
+    public ResponseEntity<?> editPassword(UserEditPassword userEditPassword){
+        return ResponseEntity.status(200).body(service.editPassword(userEditPassword));
     }
 
     @DeleteMapping("/delete/{id}")
@@ -46,4 +43,8 @@ public class AuthenticationController {
         return ResponseEntity.status(200).body(service.delete(id));
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequest request){
+        return ResponseEntity.status(200).body(service.logout(request));
+    }
 }
