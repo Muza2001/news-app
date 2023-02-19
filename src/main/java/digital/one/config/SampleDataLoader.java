@@ -34,14 +34,13 @@ public class SampleDataLoader implements CommandLineRunner {
         logger.info("Loading faker data");
 
         // create 1 account
-
-        userRepository.save(new User(
+        User user = new User(
                 "Muzaffar",
                 passwordEncoder.encode("123"),
                 "muza",
                 Instant.now(),
-                true
-        ));
-
+                true);
+        if (!userRepository.existsByUsername(user.getUsername()))
+            userRepository.save(user);
     }
 }
