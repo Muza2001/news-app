@@ -23,6 +23,11 @@ public class AuthenticationController {
         return ResponseEntity.status(200).body(service.login(dto));
     }
 
+    @GetMapping("/get_all")
+    public ResponseEntity<?> getAll(){
+        return ResponseEntity.status(200).body(service.getAll());
+    }
+
     @GetMapping("/find_by_id/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id){
         return ResponseEntity.status(200).body(service.findById(id));

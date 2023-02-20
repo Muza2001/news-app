@@ -35,7 +35,14 @@ public class BasicInfoServiceImpl implements BasicInfoService {
         Optional<ImageData> byId = imageDataRepository.findById(requests.getImage_id());
         Response response;
 
-        if (!optionalNews.isPresent()){
+        if (requests.getMessage().length() > 90000){
+            response = Response.builder()
+                    .success(false)
+                    .status_code(400)
+                    .message("Message too long " + requests.getMessage() + "\n Message max length 90000")
+                    .build();
+        }
+        else if (!optionalNews.isPresent()){
             response = Response.builder()
                     .message("News id not found")
                     .status_code(401)
@@ -47,6 +54,7 @@ public class BasicInfoServiceImpl implements BasicInfoService {
             ImageData basicInfoImageData = byId.orElse(null);
             News news = optionalNews.get();
             ImageData newsImageData = news.getImageData();
+
             BasicInformation info = repository.save(BasicInformation.builder()
                     .imageData(basicInfoImageData)
                     .message(requests.getMessage())

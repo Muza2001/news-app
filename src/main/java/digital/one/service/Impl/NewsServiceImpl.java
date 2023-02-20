@@ -1,5 +1,6 @@
 package digital.one.service.Impl;
 
+import com.github.javafaker.Cat;
 import digital.one.dto.request.*;
 import digital.one.dto.response.*;
 import digital.one.model.BasicInformation;
@@ -53,11 +54,32 @@ public class NewsServiceImpl implements NewsService {
         else {
             news.setCategory(null);
         }
+
+        if (request.getDescription().length() > 500){
+            response = Response.builder()
+                    .message("Description length too long" + request.getDescription().length() + "\n Max length 500")
+                    .status_code(400)
+                    .success(false)
+                    .build();
+            return ResponseEntity.status(400).body(response);
+        }
+        else {
+            news.setDescription(request.getDescription());
+        }
+        if (request.getTitle().length() > 300){
+            response = Response.builder()
+                    .message("Title length too long" + request.getTitle().length() + "\n Max length 500")
+                    .status_code(400)
+                    .success(false)
+                    .build();
+            return ResponseEntity.status(400).body(response);
+        }
+        else {
+            news.setTitle(request.getTitle());
+        }
             news.setCreated_at(Instant.now());
             news.setUpdated_at(Instant.now());
-            news.setTitle(request.getTitle());
             news.setSelected(request.isSelected());
-            news.setDescription(request.getDescription());
             if (request.getImage_id() > 0 && request.getImage_id() != null){
                 Optional<ImageData> byId = imageDataRepository.findById(request.getImage_id());
                 if (byId.isPresent()) {
@@ -117,7 +139,7 @@ public class NewsServiceImpl implements NewsService {
         ImageDataResponse imageDataResponse = null;
         if (!optionalNews.isPresent()){
             response = Response.builder()
-                    .message("News not found")
+                    .message("News id not found")
                     .status_code(404)
                     .success(false)
                     .build();
@@ -176,7 +198,28 @@ public class NewsServiceImpl implements NewsService {
         return ResponseEntity.status(response.getStatus_code()).body(response);
     }
 
-
+    public List<Category> getCategories(List<Long> category_ids){
+        List<Category> categories = new ArrayList<>();
+        boolean b = true;
+        if (category_ids != null) {
+            for (Long l : category_ids) {
+                if (l != null && l > 0) {
+                    Optional<Category> byId = categoryRepository.findById(l);
+                    if (byId.isPresent()) {
+                        categories.add(byId.get());
+                    }
+                    else {
+                        b = false;
+                        break;
+                    }
+                }
+            }
+        }
+        if (!b){
+            return null;
+        }
+        return categories;
+    }
 
     @Override
     public ResponseEntity<?> edit(NewsEditRequest request, Long id) {
@@ -194,23 +237,47 @@ public class NewsServiceImpl implements NewsService {
         }
         else {
             News news = optionalNews.get();
-            List<Category> categories = new ArrayList<>();
-            if (request.getCategory_ids() != null) {
-            for (Long l : request.getCategory_ids()) {
-                if (l != null && l > 0) {
-                    categories.add(categoryRepository.findById(l)
-                            .orElseThrow(() -> new IllegalArgumentException("Id not found")));
-                    }
+            List<Category> categories = getCategories(request.getCategory_ids());
+            if (categories == null){
+                response = Response.builder()
+                        .message("There are wrong id please check category id list")
+                        .success(false)
+                        .status_code(400)
+                        .build();
+                return ResponseEntity.status(400).body(response);
+            }
+            if (!news.getCategory().equals(categories))
+                news.setCategory(categories);
+
+            if (!news.getDescription().equals(request.getDescription())) {
+                if (request.getDescription().length() > 500) {
+                    response = Response.builder()
+                            .message("Description length too long" + request.getDescription().length() + "\n Max length 500")
+                            .status_code(400)
+                            .success(false)
+                            .build();
+                    return ResponseEntity.status(400).body(response);
+                } else {
+                    news.setDescription(request.getDescription());
                 }
             }
-            if (!news.getTitle().equals(request.getTitle()))
-                news.setTitle(request.getTitle());
+            if (!news.getTitle().equals(request.getTitle())) {
+                if (request.getTitle().length() > 300) {
+                    response = Response.builder()
+                            .message("Title length too long" + request.getTitle().length() + "\n Max length 500")
+                            .status_code(400)
+                            .success(false)
+                            .build();
+                    return ResponseEntity.status(400).body(response);
+                } else {
+                    news.setTitle(request.getTitle());
+                }
+            }
+
 
             if (news.isSelected() != request.isSelected())
                 news.setSelected(request.isSelected());
 
-            if (!news.getDescription().equals(request.getDescription()))
-                news.setDescription(request.getDescription());
 
             if (request.getImage_id() > 0 && request.getImage_id() != null){
                 Optional<ImageData> byId = imageDataRepository.findById(request.getImage_id());
@@ -221,7 +288,6 @@ public class NewsServiceImpl implements NewsService {
                 }
             }
 
-            news.setCategory(categories);
             Optional<List<BasicInformation>> optionalList = basicInformationRepository.findByNewsId(news.getId());
             List<BasicInfoResponseWithoutNews> basicInfoResponseWithoutNews;
             if (optionalList.isPresent()) {

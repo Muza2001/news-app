@@ -26,9 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
@@ -116,17 +114,28 @@ public class AuthenticationServiceImpl implements AuthenticationService, UserDet
         return Collections.singletonList(new SimpleGrantedAuthority(user));
     }
 
+    public UserResponse getUserResponse(User user){
+        UserResponse userResponse;
+        if (user != null){
+            userResponse = UserResponse.builder()
+                    .username(user.getUsername())
+                    .fullName(user.getFull_name())
+                    .id(user.getId())
+                    .build();
+        }
+        else {
+            userResponse = null;
+        }
+        return userResponse;
+    }
+
     @Override
     public ResponseEntity<?> findById(Long id) {
         Response response;
         Optional<User> byId = userRepository.findById(id);
         if (byId.isPresent()){
             User user = byId.get();
-            UserResponse userResponse = UserResponse.builder()
-                    .username(user.getUsername())
-                    .fullName(user.getFull_name())
-                    .id(user.getId())
-                    .build();
+            UserResponse userResponse = getUserResponse(user);
             response = Response.builder()
                     .data(userResponse)
                     .status_code(200)
@@ -167,11 +176,7 @@ public class AuthenticationServiceImpl implements AuthenticationService, UserDet
             if (!request.getFullName().equals(user.getFull_name()))
                 user.setFull_name(request.getFullName());
             User save = userRepository.save(user);
-            userResponse = UserResponse.builder()
-                    .id(save.getId())
-                    .fullName(save.getFull_name())
-                    .username(save.getUsername())
-                    .build();
+            userResponse = getUserResponse(save);
             response = Response.builder()
                     .message("User successfully edited")
                     .success(true)
@@ -205,11 +210,7 @@ public class AuthenticationServiceImpl implements AuthenticationService, UserDet
                 if (userEditPassword.getNew_password().equals(userEditPassword.getRetry_password())) {
                     user.setPassword(encoder.encode(userEditPassword.getNew_password()));
                     userRepository.save(user);
-                    userResponse = UserResponse.builder()
-                            .id(user.getId())
-                            .fullName(user.getFull_name())
-                            .username(user.getUsername())
-                            .build();
+                    userResponse = getUserResponse(user);
                     response = Response.builder()
                             .success(true)
                             .message("User password successfully edited")
@@ -270,5 +271,22 @@ public class AuthenticationServiceImpl implements AuthenticationService, UserDet
     public ResponseEntity<?> logout(RefreshTokenRequest request) {
         refreshTokenService.refreshTokenDelete(request);
         return ResponseEntity.status(200).body("Successfully logged out");
+    }
+
+    @Override
+    public ResponseEntity<?> getAll() {
+        List<UserResponse> userResponses = new ArrayList<>();
+        for (User user : userRepository.findAll()) {
+            if (user != null) {
+                userResponses.add(getUserResponse(user));
+            }
+        }
+        Response response = Response.builder()
+                .message("Users ")
+                .status_code(200)
+                .data(userResponses)
+                .success(true)
+                .build();
+        return ResponseEntity.status(response.getStatus_code()).body(response);
     }
 }

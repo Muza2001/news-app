@@ -22,7 +22,7 @@ public class BasicInformation {
     @ManyToOne
     private ImageData imageData;
 
-    @Column(length = 100000)
+    @Column(name = "message",length = 90000)
     private String message;
 
     @ManyToOne

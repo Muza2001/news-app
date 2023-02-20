@@ -38,13 +38,16 @@ public class News {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "title", length = 300)
     private String title;
 
+    @Column(name = "description", length = 500)
     private String description;
 
     private Instant created_at;
 
     private Instant updated_at;
+
 
     private boolean isSelected;
 

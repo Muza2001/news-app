@@ -17,4 +17,7 @@ public interface AuthenticationService {
     ResponseEntity<?> delete(Long id);
 
     ResponseEntity<?> logout(RefreshTokenRequest request);
+
+    ResponseEntity<?> getAll();
+
 }
