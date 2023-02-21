@@ -40,7 +40,7 @@ public class NewsController {
         return ResponseEntity.status(200).body(newsService.edit(request, id));
     }
 
-    @DeleteMapping("/delete_ny_id/{id}")
+    @DeleteMapping("/delete_by_id/{id}")
     public ResponseEntity<?> deleteById(@PathVariable Long id){
         return ResponseEntity.status(200).body(newsService.deleteById(id));
     }

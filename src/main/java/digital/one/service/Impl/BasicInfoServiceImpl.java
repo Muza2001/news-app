@@ -49,45 +49,18 @@ public class BasicInfoServiceImpl implements BasicInfoService {
                     .success(false)
                     .build();
         } else {
-            ImageDataResponse newsImageDataResponse;
-            ImageDataResponse basicInfoImageDataResponse;
             ImageData basicInfoImageData = byId.orElse(null);
             News news = optionalNews.get();
-            ImageData newsImageData = news.getImageData();
 
             BasicInformation info = repository.save(BasicInformation.builder()
                     .imageData(basicInfoImageData)
                     .message(requests.getMessage())
                     .news(news)
                     .build());
-            List<CategoryResponse> categoryResponses = new ArrayList<>();
-            for (Category c : news.getCategory()) {
-                if (c != null){
-                    categoryResponses.add(CategoryResponse.builder()
-                            .id(c.getId())
-                            .name(c.getName())
-                            .build());
-                }
-            }
-            newsImageDataResponse = imageDataResponse(newsImageData);
-
-            basicInfoImageDataResponse = imageDataResponse(basicInfoImageData);
 
             news.setUpdated_at(Instant.now());
 
-            BasicInfoResponse basicInfoResponse = BasicInfoResponse.builder()
-                    .id(info.getId())
-                    .newsResponse(NewsSimpleResponse.builder()
-                            .id(news.getId())
-                            .title(news.getTitle())
-                            .imageDataResponse(newsImageDataResponse)
-                            .description(news.getDescription())
-                            .created_at(news.getCreated_at())
-                            .categoryResponse(categoryResponses)
-                            .build())
-                    .message(info.getMessage())
-                    .imageDataResponse(basicInfoImageDataResponse)
-                    .build();
+            BasicInfoResponse basicInfoResponse = getBasicInfoResponse(getNewsSimpleResponse(news),info);
             newsRepository.save(news);
             response = Response.builder()
                     .success(true)
@@ -99,80 +72,20 @@ public class BasicInfoServiceImpl implements BasicInfoService {
         return ResponseEntity.status(response.getStatus_code()).body(response);
     }
 
-    public ImageDataResponse imageDataResponse(ImageData imageData){
-        ImageDataResponse imageDataResponse = null;
-        if (imageData != null){
-             imageDataResponse = ImageDataResponse.builder()
-                    .id(imageData.getId())
-                    .data(imageData.getData())
-                    .created_at(imageData.getCreated_at())
-                    .name(imageData.getName())
-                    .contentType(imageData.getContentType())
-                    .originalName(imageData.getOriginalName())
-                    .size(imageData.getSize())
-                    .build();
-        }
-        return imageDataResponse;
-    }
 
     @Override
     public ResponseEntity<?> findById(Long id) {
         Optional<BasicInformation> byId = repository.findById(id);
         Response response;
         BasicInfoResponse infoResponse;
-        ImageDataResponse newsImageDataResponse = null;
-        ImageDataResponse infoImageDataResponse = null;
         if (byId.isPresent()){
             BasicInformation information = byId.get();
             News news = information.getNews();
-            ImageData newsImageData = news.getImageData();
-            List<CategoryResponse> categoryResponses = new ArrayList<>();
-            for (Category c : news.getCategory()) {
-                if (c != null){
-                    categoryResponses.add(CategoryResponse.builder()
-                            .id(c.getId())
-                            .name(c.getName())
-                            .build());
-                }
-            }
 
-            if (news.getImageData() != null){
-                newsImageDataResponse = ImageDataResponse.builder().id(newsImageData.getId())
-                        .data(newsImageData.getData())
-                        .created_at(newsImageData.getCreated_at())
-                        .name(newsImageData.getName())
-                        .contentType(newsImageData.getContentType())
-                        .originalName(newsImageData.getOriginalName())
-                        .size(newsImageData.getSize())
-                        .build();
-            }
+            NewsSimpleResponse  newsSimpleResponse = getNewsSimpleResponse(news);
 
-            if (information.getImageData() != null){
-                ImageData infoImageData = information.getImageData();
-                infoImageDataResponse = ImageDataResponse.builder().id(infoImageData.getId())
-                        .data(infoImageData.getData())
-                        .created_at(infoImageData.getCreated_at())
-                        .name(infoImageData.getName())
-                        .contentType(infoImageData.getContentType())
-                        .originalName(infoImageData.getOriginalName())
-                        .size(infoImageData.getSize())
-                        .build();
-            }
+            infoResponse = getBasicInfoResponse(newsSimpleResponse,information);
 
-            NewsSimpleResponse  newsSimpleResponse = NewsSimpleResponse.builder()
-                    .id(news.getId())
-                    .title(news.getTitle())
-                    .created_at(news.getCreated_at())
-                    .description(news.getDescription())
-                    .imageDataResponse(newsImageDataResponse)
-                    .categoryResponse(categoryResponses)
-                    .build();
-            infoResponse = BasicInfoResponse.builder()
-                    .newsResponse(newsSimpleResponse)
-                    .id(information.getId())
-                    .message(information.getMessage())
-                    .imageDataResponse(infoImageDataResponse)
-                    .build();
             response = Response.builder()
                     .success(true)
                     .message("Basic information find")
@@ -189,13 +102,81 @@ public class BasicInfoServiceImpl implements BasicInfoService {
         return ResponseEntity.status(response.getStatus_code()).body(response);
     }
 
+    public BasicInfoResponse getBasicInfoResponse(NewsSimpleResponse newsSimpleResponse, BasicInformation information){
+        BasicInfoResponse infoResponse;
+        if (newsSimpleResponse != null && information != null){
+            infoResponse = BasicInfoResponse.builder()
+                    .newsResponse(newsSimpleResponse)
+                    .id(information.getId())
+                    .message(information.getMessage())
+                    .imageDataResponse(getImageDataResponse(information.getImageData()))
+                    .build();
+        }
+        else {
+            return null;
+        }
+        return infoResponse;
+    }
+
+    public List<CategoryResponse> getCategoryResponse(News news){
+        List<CategoryResponse> categoryResponses = new ArrayList<>();
+        if (news != null) {
+            for (Category c : news.getCategory()) {
+                if (c != null) {
+                    categoryResponses.add(CategoryResponse.builder()
+                            .id(c.getId())
+                            .name(c.getName())
+                            .build());
+                }
+            }
+        }
+        else {
+            return null;
+        }
+        return categoryResponses;
+    }
+
+    public ImageDataResponse getImageDataResponse(ImageData imageData){
+        ImageDataResponse imageDataResponse;
+        if (imageData != null) {
+            imageDataResponse = ImageDataResponse.builder().id(imageData.getId())
+                    .data(imageData.getData())
+                    .created_at(imageData.getCreated_at())
+                    .name(imageData.getName())
+                    .contentType(imageData.getContentType())
+                    .originalName(imageData.getOriginalName())
+                    .size(imageData.getSize())
+                    .build();
+        }
+        else {
+            return null;
+        }
+        return imageDataResponse;
+    }
+
+    public NewsSimpleResponse getNewsSimpleResponse(News news){
+        NewsSimpleResponse newsSimpleResponse;
+        if (news != null){
+            newsSimpleResponse =  NewsSimpleResponse.builder()
+                    .id(news.getId())
+                    .title(news.getTitle())
+                    .created_at(news.getCreated_at())
+                    .description(news.getDescription())
+                    .imageDataResponse(getImageDataResponse(news.getImageData()))
+                    .categoryResponse(getCategoryResponse(news))
+                    .build();
+        }
+        else {
+            return null;
+        }
+        return newsSimpleResponse;
+    }
+
     @Override
     public ResponseEntity<?> editById(Long id, BasicInfoRequest basicInfoRequest) {
         Optional<BasicInformation> byId = repository.findById(id);
         Response response;
         BasicInfoResponse basicInfoResponse;
-        ImageDataResponse imageNewsDataResponse = null;
-        ImageDataResponse imageBasicInfoResponse = new ImageDataResponse();
         NewsSimpleResponse newsSimpleResponse;
         if (!byId.isPresent()) {
             response = Response.builder()
@@ -207,75 +188,49 @@ public class BasicInfoServiceImpl implements BasicInfoService {
             BasicInformation information = byId.get();
             News news = information.getNews();
             ImageData imageData = information.getImageData();
-            if (!imageData.getId().equals(basicInfoRequest.getImage_id())) {
-                Optional<ImageData> dataOptional = imageDataRepository.findById(basicInfoRequest.getImage_id());
-                if (dataOptional.isPresent()) {
-                    information.setImageData(dataOptional.get());
-                } else {
-                    return ResponseEntity.status(401).body(Response.builder()
-                            .success(false).message("Image id not found"));
+            if (imageData == null) {
+                if (basicInfoRequest.getImage_id() > 0 && basicInfoRequest.getImage_id() != null) {
+                    Optional<ImageData> dataOptional = imageDataRepository.findById(basicInfoRequest.getImage_id());
+                    if (dataOptional.isPresent())
+                        information.setImageData(dataOptional.get());
+                    else {
+                        return ResponseEntity.status(404).body(Response.builder()
+                                .success(false)
+                                .message("Image id not found")
+                                .build());
+                    }
                 }
             }
-            List<CategoryResponse> categoryResponses = new ArrayList<>();
+            else if(!imageData.getId().equals(basicInfoRequest.getImage_id())) {
+                    Optional<ImageData> dataOptional = imageDataRepository.findById(basicInfoRequest.getImage_id());
+                    if (dataOptional.isPresent()) {
+                        information.setImageData(dataOptional.get());
+                    } else {
+                        return ResponseEntity.status(404).body(Response.builder()
+                                .success(false).message("Image id not found").build());
+                    }
+            }
+
+            if (!information.getMessage().equals(basicInfoRequest.getMessage())) {
+                information.setMessage(basicInfoRequest.getMessage());
+            }
+
             if (!news.getId().equals(basicInfoRequest.getNews_id())) {
                 Optional<News> newsRepositoryById = newsRepository.findById(basicInfoRequest.getNews_id());
                 if (newsRepositoryById.isPresent()) {
                     News news1 = newsRepositoryById.get();
                     information.setNews(news1);
-                    for (Category category : news1.getCategory()) {
-                        if (category != null) {
-                            categoryResponses.add(new CategoryResponse(category.getId(), category.getName()));
-                        }
-                    }
                 } else {
                     return ResponseEntity.status(401).body(Response.builder()
                             .success(false).message("News id not found"));
                 }
-
             }
-            if (!information.getMessage().equals(basicInfoRequest.getMessage())) {
-                information.setMessage(basicInfoRequest.getMessage());
-            }
-                News news1 = information.getNews();
-            ImageData infoImageData = information.getImageData();
-            ImageData newsImageData = news1.getImageData();
-                if (newsImageData != null) {
-                    imageNewsDataResponse = ImageDataResponse.builder()
-                            .id(newsImageData.getId())
-                            .data(newsImageData.getData())
-                            .size(newsImageData.getSize())
-                            .contentType(newsImageData.getContentType())
-                            .created_at(newsImageData.getCreated_at())
-                            .originalName(newsImageData.getOriginalName())
-                            .name(newsImageData.getName())
-                            .build();
-                }
-                if (infoImageData != null){
-                    imageBasicInfoResponse = ImageDataResponse.builder()
-                            .id(infoImageData.getId())
-                            .data(infoImageData.getData())
-                            .size(infoImageData.getSize())
-                            .contentType(infoImageData.getContentType())
-                            .created_at(infoImageData.getCreated_at())
-                            .originalName(infoImageData.getOriginalName())
-                            .name(infoImageData.getName())
-                            .build();
 
-                }
-            newsSimpleResponse = NewsSimpleResponse.builder()
-                    .categoryResponse(categoryResponses)
-                    .imageDataResponse(imageNewsDataResponse)
-                    .id(news1.getId())
-                    .created_at(news1.getCreated_at())
-                    .title(news1.getTitle())
-                    .description(news1.getDescription())
-                    .build();
+            BasicInformation save = repository.save(information);
 
-            basicInfoResponse = BasicInfoResponse.builder()
-                    .newsResponse(newsSimpleResponse)
-                    .imageDataResponse(imageBasicInfoResponse)
-                    .id(information.getId())
-                    .build();
+            newsSimpleResponse = getNewsSimpleResponse(save.getNews());
+
+            basicInfoResponse = getBasicInfoResponse(newsSimpleResponse,information);
 
             response = Response.builder()
                     .data(basicInfoResponse)
@@ -284,7 +239,6 @@ public class BasicInfoServiceImpl implements BasicInfoService {
                     .status_code(200)
                     .build();
 
-            repository.save(information);
         }
         return ResponseEntity.status(200).body(response);
     }

@@ -1,6 +1,5 @@
 package digital.one.service.Impl;
 
-import com.github.javafaker.Cat;
 import digital.one.dto.request.*;
 import digital.one.dto.response.*;
 import digital.one.model.BasicInformation;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,38 +88,7 @@ public class NewsServiceImpl implements NewsService {
                 }
             }
         News save = repository.save(news);
-        if (news.getCategory() != null) {
-                List<CategoryResponse> categoryResponses = new ArrayList<>();
-                for (Category category : categories) {
-                    categoryResponses.add(new CategoryResponse(
-                            category.getId(),
-                            category.getName()));
-                }
-                ImageDataResponse imageDataResponse = null;
-                if (news.getImageData() != null){
-                    ImageData imageData = news.getImageData();
-                    imageDataResponse = getImageDataResponse(imageData);
-                }
-                newsSimpleResponse = NewsSimpleResponse.builder()
-                        .created_at(news.getCreated_at())
-                        .imageDataResponse(imageDataResponse)
-                        .categoryResponse(categoryResponses)
-                        .isSelected(news.isSelected())
-                        .description(news.getDescription())
-                        .title(news.getTitle())
-                        .id(save.getId())
-                        .build();
-            }
-            else {
-                newsSimpleResponse = NewsSimpleResponse.builder()
-                        .created_at(news.getCreated_at())
-                        .categoryResponse(null)
-                        .description(news.getDescription())
-                        .isSelected(news.isSelected())
-                        .title(news.getTitle())
-                        .id(save.getId())
-                        .build();
-            }
+        newsSimpleResponse = getNewsSimpleResponse(save);
         response = Response.builder()
                 .success(true)
                 .message("Successfully created")
@@ -131,12 +98,88 @@ public class NewsServiceImpl implements NewsService {
         return ResponseEntity.status(response.getStatus_code()).body(response);
     }
 
+
+    public List<CategoryResponse> getCategoryResponse(News news){
+        List<CategoryResponse> categoryResponses = new ArrayList<>();
+        if (news != null) {
+            for (Category c : news.getCategory()) {
+                if (c != null) {
+                    categoryResponses.add(CategoryResponse.builder()
+                            .id(c.getId())
+                            .name(c.getName())
+                            .build());
+                }
+            }
+        }
+        else {
+            return null;
+        }
+        return categoryResponses;
+    }
+
+
+    public NewsSimpleResponse getNewsSimpleResponse(News news){
+
+        NewsSimpleResponse newsSimpleResponse;
+        if (news != null){
+            newsSimpleResponse =  NewsSimpleResponse.builder()
+                    .id(news.getId())
+                    .title(news.getTitle())
+                    .created_at(news.getCreated_at())
+                    .description(news.getDescription())
+                    .imageDataResponse(getImageDataResponse(news.getImageData()))
+                    .categoryResponse(getCategoryResponse(news))
+                    .build();
+        }
+        else {
+            return null;
+        }
+        return newsSimpleResponse;
+    }
+
+    public NewsResponse getNewsResponse(News news){
+        NewsResponse newsResponse;
+        if (news != null){
+            newsResponse = NewsResponse.builder()
+                    .categoryResponse(getCategoryResponse(news))
+                    .infoResponses(null)
+                    .title(news.getTitle())
+                    .id(news.getId())
+                    .isSelected(news.isSelected())
+                    .imageDataResponse(getImageDataResponse(news.getImageData()))
+                    .description(news.getDescription())
+                    .build();
+        }
+        else {
+            return null;
+        }
+        return newsResponse;
+    }
+
+    public NewsResponse getNewsResponse(News news,List<BasicInfoResponseWithoutNews> basicInfoResponseWithoutNews){
+        NewsResponse newsResponse;
+        if (news != null){
+            newsResponse = NewsResponse.builder()
+                    .categoryResponse(getCategoryResponse(news))
+                    .infoResponses(basicInfoResponseWithoutNews)
+                    .title(news.getTitle())
+                    .id(news.getId())
+                    .isSelected(news.isSelected())
+                    .imageDataResponse(getImageDataResponse(news.getImageData()))
+                    .description(news.getDescription())
+                    .build();
+        }
+        else {
+            return null;
+        }
+        return newsResponse;
+    }
+
     @Override
     public ResponseEntity<?> findById(Long id) {
         Optional<News> optionalNews = repository.findById(id);
         Response response;
         NewsResponse newsResponse;
-        ImageDataResponse imageDataResponse = null;
         if (!optionalNews.isPresent()){
             response = Response.builder()
                     .message("News id not found")
@@ -145,48 +188,14 @@ public class NewsServiceImpl implements NewsService {
                     .build();
         } else {
             News news = optionalNews.get();
-            ImageData imageData = news.getImageData();
-            if (imageData != null) {
-                imageDataResponse = getImageDataResponse(imageData);
-            }
-
-            List<CategoryResponse> categoryResponse = new ArrayList<>();
-            if (news.getCategory() == null) {
-                categoryResponse = null;
-            }
-            else {
-                for (Category category : news.getCategory()) {
-                    if (category != null && category.getId() > 0) {
-                        categoryResponse.add(new CategoryResponse(category.getId(), category.getName()));
-                    }
-                }
-            }
             Optional<List<BasicInformation>> optionalList = basicInformationRepository.findByNewsId(news.getId());
             if (!optionalList.isPresent()){
-                    newsResponse = NewsResponse.builder()
-                            .categoryResponse(categoryResponse)
-                            .infoResponses(null)
-                            .title(news.getTitle())
-                            .id(news.getId())
-                            .isSelected(news.isSelected())
-                            .imageDataResponse(imageDataResponse)
-                            .description(news.getDescription())
-                            .build();
+                    newsResponse = getNewsResponse(news);
                 }
             else {
-                List<BasicInformation> basicInformations = optionalList.get();
                 List<BasicInfoResponseWithoutNews> basicInfoResponseWithoutNews
-                        = getBasicInfoResponseWithoutNews(basicInformations);
-                newsResponse = NewsResponse.builder()
-                            .categoryResponse(categoryResponse)
-                            .infoResponses(basicInfoResponseWithoutNews)
-                            .title(news.getTitle())
-                            .id(news.getId())
-                            .isSelected(news.isSelected())
-                            .created_at(news.getCreated_at())
-                            .imageDataResponse(imageDataResponse)
-                            .description(news.getDescription())
-                            .build();
+                        = getBasicInfoResponseWithoutNews(optionalList.get());
+                newsResponse = getNewsResponse(news,basicInfoResponseWithoutNews);
             }
             response = Response.builder()
                     .success(true)
@@ -226,7 +235,6 @@ public class NewsServiceImpl implements NewsService {
         Optional<News> optionalNews = repository.findById(id);
         Response response;
         NewsResponse newsResponse;
-        ImageDataResponse imageDataResponse = null;
         if (!optionalNews.isPresent()){
             response = Response.builder()
                     .message("News id not found")
@@ -284,37 +292,20 @@ public class NewsServiceImpl implements NewsService {
                 if (byId.isPresent()){
                     ImageData imageData = byId.get();
                         news.setImageData(imageData);
-                        imageDataResponse = getImageDataResponse(imageData);
                 }
             }
 
-            Optional<List<BasicInformation>> optionalList = basicInformationRepository.findByNewsId(news.getId());
-            List<BasicInfoResponseWithoutNews> basicInfoResponseWithoutNews;
+
+            Optional<List<BasicInformation>> optionalList = basicInformationRepository.findAllByNews(news);
             if (optionalList.isPresent()) {
-                List<BasicInformation> basicInformation = optionalList.get();
-                basicInfoResponseWithoutNews = getBasicInfoResponseWithoutNews(basicInformation);
+                newsResponse = getNewsResponse(news,getBasicInfoResponseWithoutNews(optionalList.get()));
             }
             else {
-                basicInfoResponseWithoutNews = null;
-            }
-
-            List<CategoryResponse> categoryResponses = new ArrayList<>();
-            for (Category c : categories) {
-                categoryResponses.add(new CategoryResponse(c.getId(), c.getName()));
+                newsResponse = getNewsResponse(news);
             }
 
             news.setUpdated_at(Instant.now());
             repository.save(news);
-            newsResponse = NewsResponse.builder()
-                    .title(news.getTitle())
-                    .description(news.getDescription())
-                    .imageDataResponse(imageDataResponse)
-                    .infoResponses(basicInfoResponseWithoutNews)
-                    .categoryResponse(categoryResponses)
-                    .isSelected(news.isSelected())
-                    .id(news.getId())
-                    .created_at(news.getCreated_at())
-                    .build();
             response = Response.builder()
                     .data(newsResponse)
                     .success(true)
@@ -328,6 +319,7 @@ public class NewsServiceImpl implements NewsService {
     public List<BasicInfoResponseWithoutNews> getBasicInfoResponseWithoutNews
             (List<BasicInformation> basicInformation){
         List<BasicInfoResponseWithoutNews> basicInfoResponseWithoutNews = new ArrayList<>();
+        if (basicInformation != null && basicInformation.size() > 0){
         for (BasicInformation info : basicInformation) {
             if (info != null) {
                 basicInfoResponseWithoutNews.add(
@@ -337,6 +329,10 @@ public class NewsServiceImpl implements NewsService {
                                 .imageDataResponse(getImageDataResponse(info.getImageData()))
                                 .build());
             }
+        }
+    }
+        else {
+            return null;
         }
         return basicInfoResponseWithoutNews;
     }
@@ -360,7 +356,7 @@ public class NewsServiceImpl implements NewsService {
             }
         }
         else {
-            newsResponses = null;
+            return null;
         }
         return newsResponses;
     }
@@ -378,7 +374,7 @@ public class NewsServiceImpl implements NewsService {
             }
         }
         else {
-            categoryResponses = null;
+            return null;
         }
         return categoryResponses;
     }
@@ -481,14 +477,16 @@ public class NewsServiceImpl implements NewsService {
     }
 
     public PageResponse pageResponse(Page<News> allByTitleContainsAndOrderByIdDesc){
-        PageResponse pageResponse = new PageResponse();
+        PageResponse pageResponse;
         if (allByTitleContainsAndOrderByIdDesc != null && allByTitleContainsAndOrderByIdDesc.getSize() > 0) {
-            pageResponse.setContent(newsResponses(allByTitleContainsAndOrderByIdDesc.getContent()));
-            pageResponse.setPageNumber(allByTitleContainsAndOrderByIdDesc.getNumber());
-            pageResponse.setTotalPages(allByTitleContainsAndOrderByIdDesc.getTotalPages());
-            pageResponse.setSize(allByTitleContainsAndOrderByIdDesc.getSize());
-            pageResponse.setNumberOfElements(allByTitleContainsAndOrderByIdDesc.getNumberOfElements());
-            pageResponse.setTotalElements(allByTitleContainsAndOrderByIdDesc.getTotalElements());
+            pageResponse = PageResponse.builder()
+                            .content(newsResponses(allByTitleContainsAndOrderByIdDesc.getContent()))
+                            .pageNumber(allByTitleContainsAndOrderByIdDesc.getNumber())
+                            .totalPages(allByTitleContainsAndOrderByIdDesc.getTotalPages())
+                            .size(allByTitleContainsAndOrderByIdDesc.getSize())
+                            .numberOfElements(allByTitleContainsAndOrderByIdDesc.getNumberOfElements())
+                            .totalElements(allByTitleContainsAndOrderByIdDesc.getTotalElements())
+                            .build();
         }
         else {
             pageResponse = null;
@@ -510,7 +508,8 @@ public class NewsServiceImpl implements NewsService {
         }
         else {
             News news = optionalNews.get();
-            basicInformationRepository.deleteByNewsId(news.getId());
+            Optional<List<BasicInformation>> allByNews = basicInformationRepository.findAllByNews(news);
+            allByNews.ifPresent(basicInformationRepository::deleteAll);
             repository.deleteById(news.getId());
             response = Response.builder()
                     .status_code(200)
