@@ -10,6 +10,7 @@ import digital.one.repository.BasicInformationRepository;
 import digital.one.repository.CategoryRepository;
 import digital.one.repository.ImageDataRepository;
 import digital.one.repository.NewsRepository;
+import digital.one.service.BasicInfoService;
 import digital.one.service.NewsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,8 @@ public class NewsServiceImpl implements NewsService {
     private final BasicInformationRepository basicInformationRepository;
 
     private final CategoryRepository categoryRepository;
+
+    private final BasicInfoServiceImpl basicInfoService;
 
     private final ImageDataRepository imageDataRepository;
 
@@ -55,7 +58,7 @@ public class NewsServiceImpl implements NewsService {
 
         if (request.getDescription().length() > 500){
             response = Response.builder()
-                    .message("Description length too long" + request.getDescription().length() + "\n Max length 500")
+                    .message("Description length too long : " + request.getDescription().length() + " Max length 500")
                     .status_code(400)
                     .success(false)
                     .build();
@@ -88,7 +91,7 @@ public class NewsServiceImpl implements NewsService {
                 }
             }
         News save = repository.save(news);
-        newsSimpleResponse = getNewsSimpleResponse(save);
+        newsSimpleResponse = basicInfoService.getNewsSimpleResponse(save);
         response = Response.builder()
                 .success(true)
                 .message("Successfully created")
@@ -98,50 +101,11 @@ public class NewsServiceImpl implements NewsService {
         return ResponseEntity.status(response.getStatus_code()).body(response);
     }
 
-
-    public List<CategoryResponse> getCategoryResponse(News news){
-        List<CategoryResponse> categoryResponses = new ArrayList<>();
-        if (news != null) {
-            for (Category c : news.getCategory()) {
-                if (c != null) {
-                    categoryResponses.add(CategoryResponse.builder()
-                            .id(c.getId())
-                            .name(c.getName())
-                            .build());
-                }
-            }
-        }
-        else {
-            return null;
-        }
-        return categoryResponses;
-    }
-
-
-    public NewsSimpleResponse getNewsSimpleResponse(News news){
-
-        NewsSimpleResponse newsSimpleResponse;
-        if (news != null){
-            newsSimpleResponse =  NewsSimpleResponse.builder()
-                    .id(news.getId())
-                    .title(news.getTitle())
-                    .created_at(news.getCreated_at())
-                    .description(news.getDescription())
-                    .imageDataResponse(getImageDataResponse(news.getImageData()))
-                    .categoryResponse(getCategoryResponse(news))
-                    .build();
-        }
-        else {
-            return null;
-        }
-        return newsSimpleResponse;
-    }
-
     public NewsResponse getNewsResponse(News news){
         NewsResponse newsResponse;
         if (news != null){
             newsResponse = NewsResponse.builder()
-                    .categoryResponse(getCategoryResponse(news))
+                    .categoryResponse(basicInfoService.getCategoryResponse(news))
                     .infoResponses(null)
                     .title(news.getTitle())
                     .id(news.getId())
@@ -160,7 +124,7 @@ public class NewsServiceImpl implements NewsService {
         NewsResponse newsResponse;
         if (news != null){
             newsResponse = NewsResponse.builder()
-                    .categoryResponse(getCategoryResponse(news))
+                    .categoryResponse(basicInfoService.getCategoryResponse(news))
                     .infoResponses(basicInfoResponseWithoutNews)
                     .title(news.getTitle())
                     .id(news.getId())
@@ -348,7 +312,7 @@ public class NewsServiceImpl implements NewsService {
                             .imageDataResponse(getImageDataResponse(news.getImageData()))
                             .infoResponses(getBasicInfoResponse(news))
                             .isSelected(news.isSelected())
-                            .categoryResponse(getCategoryResponse(news.getCategory()))
+                            .categoryResponse(basicInfoService.getCategoryResponse(news))
                             .id(news.getId())
                             .created_at(news.getCreated_at())
                             .build());
@@ -359,24 +323,6 @@ public class NewsServiceImpl implements NewsService {
             return null;
         }
         return newsResponses;
-    }
-
-    private List<CategoryResponse> getCategoryResponse(List<Category> category) {
-        List<CategoryResponse> categoryResponses = new ArrayList<>();
-        if (category.size() > 0){
-            for (Category ca: category) {
-                if (ca != null){
-                    categoryResponses.add(CategoryResponse.builder()
-                            .id(ca.getId())
-                            .name(ca.getName())
-                            .build());
-                }
-            }
-        }
-        else {
-            return null;
-        }
-        return categoryResponses;
     }
 
     private List<BasicInfoResponseWithoutNews> getBasicInfoResponse(News news) {

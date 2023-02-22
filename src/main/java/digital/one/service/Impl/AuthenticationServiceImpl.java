@@ -56,7 +56,7 @@ public class AuthenticationServiceImpl implements AuthenticationService, UserDet
         else {
             user.setUsername(userDto.getUsername());
             user.setExpiration(Instant.now());
-            user.setFull_name(user.getFull_name());
+            user.setFull_name(userDto.getFull_name());
             user.setPassword(encoder.encode(userDto.getPassword()));
             user.setIsEnabled(true);
             User save = userRepository.save(user);
