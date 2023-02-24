@@ -15,8 +15,9 @@ public interface BasicInformationRepository extends JpaRepository<BasicInformati
 
     Optional<List<BasicInformation>> findByNewsId(Long news_id);
 
-    @Query(nativeQuery = true, value = "select * from basic_information bi inner join news n on bi.news_id = n.id where sort_id = ?1")
-    Optional<BasicInformation> existsBySort_idOnBasicInfo(Long id);
+    @Query(nativeQuery = true, value = "select * from basic_information bi" +
+            "            inner join news n on bi.news_id = ?1 where sort_id = ?2")
+    Optional<BasicInformation> existsBySort_idOnBasicInfo(News news,Long id);
 
     @Query(nativeQuery = true,
             value = "select * from basic_information bi inner join news n on " +

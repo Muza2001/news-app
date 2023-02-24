@@ -52,7 +52,7 @@ public class BasicInfoServiceImpl implements BasicInfoService {
             ImageData basicInfoImageData = byId.orElse(null);
             News news = optionalNews.get();
             if (requests.getSort_id() != null && requests.getSort_id() > 0){
-                Optional<BasicInformation> basicInformation = repository.existsBySort_idOnBasicInfo(requests.getSort_id());
+                Optional<BasicInformation> basicInformation = repository.existsBySort_idOnBasicInfo(news,requests.getSort_id());
                 if (basicInformation.isPresent()){
                     return ResponseEntity.status(400).body(Response.builder()
                             .message("Sort id already exists or sort id wrong")
@@ -226,7 +226,7 @@ public class BasicInfoServiceImpl implements BasicInfoService {
             if (!information.getSort_id().equals(basicInfoRequest.getSort_id())){
                 if (basicInfoRequest.getSort_id() != null && basicInfoRequest.getSort_id() > 0){
                     Optional<BasicInformation> basicInformation =
-                            repository.existsBySort_idOnBasicInfo(basicInfoRequest.getSort_id());
+                            repository.existsBySort_idOnBasicInfo(news,basicInfoRequest.getSort_id());
                     if (basicInformation.isPresent()) {
                         return ResponseEntity.status(400).body(Response.builder()
                                 .success(false)
