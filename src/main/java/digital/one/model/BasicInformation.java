@@ -28,6 +28,8 @@ public class BasicInformation {
     @ManyToOne
     private News news;
 
+    private Long sort_id;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

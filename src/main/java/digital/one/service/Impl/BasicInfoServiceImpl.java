@@ -45,22 +45,33 @@ public class BasicInfoServiceImpl implements BasicInfoService {
         else if (!optionalNews.isPresent()){
             response = Response.builder()
                     .message("News id not found")
-                    .status_code(401)
+                    .status_code(404)
                     .success(false)
                     .build();
         } else {
             ImageData basicInfoImageData = byId.orElse(null);
             News news = optionalNews.get();
+            if (requests.getSort_id() != null && requests.getSort_id() > 0){
+                Optional<BasicInformation> basicInformation = repository.existsBySort_idOnBasicInfo(requests.getSort_id());
+                if (basicInformation.isPresent()){
+                    return ResponseEntity.status(400).body(Response.builder()
+                            .message("Sort id already exists or sort id wrong")
+                            .status_code(404)
+                            .success(false)
+                            .build());
+                }
+            }
 
             BasicInformation info = repository.save(BasicInformation.builder()
                     .imageData(basicInfoImageData)
                     .message(requests.getMessage())
                     .news(news)
+                    .sort_id(requests.getSort_id())
                     .build());
 
             news.setUpdated_at(Instant.now());
 
-            BasicInfoResponse basicInfoResponse = getBasicInfoResponse(getNewsSimpleResponse(news),info);
+            BasicInfoResponse basicInfoResponse = getBasicInfoResponse(getNewsSimpleResponse(news), info);
             newsRepository.save(news);
             response = Response.builder()
                     .success(true)
@@ -108,6 +119,7 @@ public class BasicInfoServiceImpl implements BasicInfoService {
             infoResponse = BasicInfoResponse.builder()
                     .newsResponse(newsSimpleResponse)
                     .id(information.getId())
+                    .sort_id(information.getSort_id())
                     .message(information.getMessage())
                     .imageDataResponse(getImageDataResponse(information.getImageData()))
                     .build();
@@ -211,6 +223,23 @@ public class BasicInfoServiceImpl implements BasicInfoService {
                     }
             }
 
+            if (!information.getSort_id().equals(basicInfoRequest.getSort_id())){
+                if (basicInfoRequest.getSort_id() != null && basicInfoRequest.getSort_id() > 0){
+                    Optional<BasicInformation> basicInformation =
+                            repository.existsBySort_idOnBasicInfo(basicInfoRequest.getSort_id());
+                    if (basicInformation.isPresent()) {
+                        return ResponseEntity.status(400).body(Response.builder()
+                                .success(false)
+                                .message("Sort id already exists")
+                                .status_code(400)
+                                .build());
+                    }
+                    else {
+                        information.setSort_id(basicInfoRequest.getSort_id());
+                    }
+                }
+            }
+
             if (!information.getMessage().equals(basicInfoRequest.getMessage())) {
                 information.setMessage(basicInfoRequest.getMessage());
             }
@@ -221,8 +250,8 @@ public class BasicInfoServiceImpl implements BasicInfoService {
                     News news1 = newsRepositoryById.get();
                     information.setNews(news1);
                 } else {
-                    return ResponseEntity.status(401).body(Response.builder()
-                            .success(false).message("News id not found"));
+                    return ResponseEntity.status(400).body(Response.builder()
+                            .success(false).message("News id not found").build());
                 }
             }
 

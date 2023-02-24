@@ -15,4 +15,5 @@ public class BasicInfoRequest {
 
     private String message;
 
+    private Long sort_id;
 }

@@ -17,4 +17,6 @@ public class BasicInfoResponseWithoutNews {
 
     private String message;
 
+    private Long sort_id;
+
 }

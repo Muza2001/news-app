@@ -152,7 +152,7 @@ public class NewsServiceImpl implements NewsService {
                     .build();
         } else {
             News news = optionalNews.get();
-            Optional<List<BasicInformation>> optionalList = basicInformationRepository.findByNewsId(news.getId());
+            Optional<List<BasicInformation>> optionalList = basicInformationRepository.findByNewsOrderBySort_id(news);
             if (!optionalList.isPresent()){
                     newsResponse = getNewsResponse(news);
                 }
@@ -290,6 +290,7 @@ public class NewsServiceImpl implements NewsService {
                         BasicInfoResponseWithoutNews.builder()
                                 .id(info.getId())
                                 .message(info.getMessage())
+                                .sort_id(info.getSort_id())
                                 .imageDataResponse(getImageDataResponse(info.getImageData()))
                                 .build());
             }

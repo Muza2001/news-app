@@ -18,6 +18,8 @@ public class BasicInfoResponse {
 
     private String message;
 
+    private Long sort_id;
+
     private NewsSimpleResponse newsResponse;
 
 }
